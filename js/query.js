@@ -80,14 +80,13 @@ jQuery(function($) {
         $("#resultArea").css("color", "black");
         /* Process the given type of query */
         switch (queryData.type) {
-            case "who":
+            case "whoOrWhat":
                 var results = await getResultFromWd(queryData.query, queryData.inputs, queryInputs);
                 await showWdAndWpResults(results);
                 break;
-            case "what":
+            case "genericWd":
                 var results = await getResultFromWd(queryData.query, queryData.inputs, queryInputs);
-                await showWdAndWpResults(results);
-                break;
+                break;                
             case "news":
                 await(showNews(queryInputs));
                 break;
@@ -412,7 +411,7 @@ jQuery(function($) {
         var articlearray = $.map(json, function(el) { return el });
         articlearray.shift();
         articlearray.shift();
-        
+
         function createArticle(article) {
             return `
                 <div>
@@ -426,11 +425,11 @@ jQuery(function($) {
                                 <p style="color:grey">Read more...</p>
                             </a>
                         </td>
-                    </table>                                
+                    </table>
                 </div>
                 `;
         }
-        
+
         /* Show results */
         for (i = 0; i < articlearray.length; i++) {
             var resultElem = $("<li></li>");

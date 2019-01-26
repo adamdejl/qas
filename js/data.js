@@ -2,10 +2,10 @@
 
 var data = {
     0: {
-        type: "who",
+        type: "whoOrWhat",
         patterns: {
-            0: /who is (.+?)\??$/i,
-            1: /who was (.+?)\??$/i
+            0: /who\s+is\s+(.+?)\??$/i,
+            1: /who\s+was\s+(.+?)\??$/i
         },
         inputs: {
             0: "$searchedObject"
@@ -37,11 +37,11 @@ var data = {
             ORDER BY DESC(?count)`
     },
     1: {
-        type: "what",
+        type: "whoOrWhat",
         patterns: {
-            0: /what is a (.+?)\??$/i,
-            1: /what is (.+?)\??$/i,
-            2: /what was (.+?)\??$/i
+            0: /what\s+is\s+a\s+(.+?)\??$/i,
+            1: /what\s+is\s+(.+?)\??$/i,
+            2: /what\s+was\s+(.+?)\??$/i
         },
         inputs: {
             0: "$searchedObject"
@@ -73,23 +73,25 @@ var data = {
             ORDER BY DESC(?count)`
     },
     2: {
-        type: "whenBorn",
+        type: "genericWd",
         patterns: {
-            0: /what was (.+?) born\??$/i,
-            1: /what is the date of birth of (.+?)\??$/i
+            0: /what\s+was\s+(.+?)\s+born\??$/i,
+            1: /what\s+is\s+the\s+date\s+of\s+birth\s+of\s+(.+?)\??$/i
         },
         inputs: {
             0: "$searchedObject"
         },
+        results: {
+            0: "born"
+        },
+        output: "$searchedObject was born on $born",
         query: `
-            SELECT ?object ?objectLabel ?objectDescription ?article ?ended ?picture (COUNT(DISTINCT ?sitelink) AS ?count) WHERE {
-              ?object rdfs:label|skos:altLabel "London"@en .
+            SELECT ?object ?objectLabel ?objectDescription ?article ?born ?picture (COUNT(DISTINCT ?sitelink) AS ?count) WHERE {
+              ?object rdfs:label|skos:altLabel "$searchedObject"@en .
+              ?object wdt:P569 ?born .
               OPTIONAL {
                 ?article schema:isPartOf <https://en.wikipedia.org/>;
                   schema:about ?object.
-              }
-              OPTIONAL {
-                ?object wdt:P576 ?ended .
               }
               OPTIONAL {
                 ?sitelink schema:about ?object .
@@ -100,11 +102,10 @@ var data = {
               SERVICE wikibase:label {
                 bd:serviceParam wikibase:language "en" .
               }
-              FILTER NOT EXISTS{?object wdt:P31 wd:Q5}
               FILTER NOT EXISTS{?object wdt:P31 wd:Q4167410}
               FILTER NOT EXISTS{?object wdt:P31/wdt:P279* wd:Q18616576}
             }
-            GROUP BY ?object ?objectLabel ?objectDescription ?article ?ended ?picture
+            GROUP BY ?object ?objectLabel ?objectDescription ?article ?born ?picture
             ORDER BY DESC(?count)`
     },
     3: {
