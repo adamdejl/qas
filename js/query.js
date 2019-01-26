@@ -63,12 +63,8 @@ jQuery(function($) {
         switch (queryData.type) {
             case "who":
                 var sparqlQuery = queryData.query.replace(queryData.inputs[0], queryInputs[0])
-<<<<<<< HEAD
-                var resultElem = $("<div></div>").addClass("result_elem");
-=======
                 var resultElem = $("<li></li>");
-                var success;
->>>>>>> a86878a075aa7ffd72ddec764db1d48bd677249f
+
                 try {
                     var response = await getWDResponse(sparqlQuery);
                 } catch (error) {
@@ -107,7 +103,6 @@ jQuery(function($) {
                         /* No match found even with spellcheck */
                         resultElem.text("Unfortunately, your query did not match any items.")
                         $("#resultArea").append(resultElem);
-<<<<<<< HEAD
                         hideLoadingSpinner();
                         return;
                     }
@@ -130,63 +125,30 @@ jQuery(function($) {
                 /* Show results */
                 var previous;
                 for (var result in results) {
+                    var resultHeader = $("<div></div>").addClass("collapsible-header");
+                    var resultBody = $("<div></div>").addClass("collapsible-body");
                     if (results[result].person.value != previous) {
                         if (extracts[result] != null) {
                             /* Show available Wikipedia extract */
-                            resultElem.html(extracts[result]);
+                            resultHeader.text(articleNames[result]);
+                            resultBody.html(extracts[result]);
                         } else {
                             /* Show Wikidata description */
                             var name = results[result].personLabel.value;
                             var description = results[result].personDescription.value;
+                            resultHeader.text(name);
                             if (results[result].died == null) {
-                                resultElem.text(name + " is " + description);
+                                resultBody.text(name + " is " + description);
                             } else {
-                                resultElem.text(name + " was " + description);
+                                resultBody.text(name + " was " + description);
                             }
-=======
-                    } else {
-                        var articleNames = [];
-                        /* Fetch text extracts from Wikipedia (where applicable) */
-                        for (var result in results) {
-                            if (results[result].article != null) {
-                                articleNames[result] = decodeURI(results[result].article.value);
-                                articleNames[result] = articleNames[result].replace("https://en.wikipedia.org/wiki/", "");
-                                articleNames[result] = articleNames[result].replace(/_/g, " ");
-                            }
-                        }
-                        console.log(articleNames);
-                        var extracts = await getWPExtracts(articleNames);
-                        console.log(extracts);
-                        var previous;
-                        for (var result in results) {
-                            var resultHeader = $("<div></div>").addClass("collapsible-header");
-                            var resultBody = $("<div></div>").addClass("collapsible-body");
-                            if (results[result].person.value != previous) {
-                                if (extracts[result] != null) {
-                                    resultHeader.text(articleNames[result]);
-                                    resultBody.html(extracts[result]);
-                                } else {
-                                    var name = results[result].personLabel.value;
-                                    var description = results[result].personDescription.value;
-                                    resultHeader.text(name);
-                                    if (results[result].died == null) {
-                                        resultBody.text(name + " is " + description);
-                                    } else {
-                                        resultBody.text(name + " was " + description);
-                                    }
-                                }
-                                previous = results[result].person.value;
-                            }
-                            resultElem.append(resultHeader);
-                            resultElem.append(resultBody);
-                            $("#resultArea").append(resultElem);
-                            resultElem = $("<li></li>");
->>>>>>> a86878a075aa7ffd72ddec764db1d48bd677249f
                         }
                         previous = results[result].person.value;
                     }
+                    resultElem.append(resultHeader);
+                    resultElem.append(resultBody);
                     $("#resultArea").append(resultElem);
-                    resultElem = $("<div></div>").addClass("result_elem");
+                    resultElem = $("<li></li>");
                 }
                 break;
         }
