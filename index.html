@@ -13,23 +13,45 @@
         <script src="./lib/js/materialize.js"></script>
         <script src="./js/data.js"></script>
         <script src="./js/query.js"></script>
-        <h1>QAS</h1>
-        <div id=inputArea>
-            <input id="queryInput" type="text" autocomplete="off" autofocus
-             size="100">
-            <button id="querySubmit" type="button">Submit query</button>
+
+        <nav>
+            <div class="nav-wrapper">
+                <a href="#" class="brand-logo">QAS</a>
+            </div>
+        </nav>
+
+        <div class="container">
+
+            <div class="row">
+                <div class="col s12 m6 offset-m3">
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="row">
+                                <div class="input-field col s12" id=inputArea>
+                                    <input id="queryInput" type="text" autocomplete="off" autofocus>
+                                    <label for="queryInput">Enter a question</label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col s12">
+                                    <a class="waves-effect waves-light btn right" id="querySubmit">Submit query</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row" id="outputArea">
+                <div id="queryShow">
+                    Input query goes here
+                </div>
+                <div id="resultArea">
+                    Results go here
+                </div>
+            </div>
+
         </div>
-        <div id="outputArea">
-            <div id="queryShow">
-                Input query goes here
-            </div>
-            <div id="resultArea">
-                Results go here
-            </div>
-            <div id="loadingArea">
-                <img id="loadingImg" src="/images/loading.gif" alt="Loading animation">
-                <span>Loading...</span>
-            </div>
-        </div>
+
     </body>
 </html>
