@@ -34,8 +34,9 @@ jQuery(function($) {
                 }
             }
         }
-        /* Clean resultArea */
+        /* Clear resultArea */
         $("#resultArea").text("");
+        $("#resultArea").css("color", "black");
         /* Process the given type of query */
         switch (queryData.type) {
             case "who":
@@ -49,19 +50,51 @@ jQuery(function($) {
                     success = false;
                 }
                 if (success) {
+                    /* API request succeeded */
                     var results = response.results.bindings;
                     if (results.length == 0) {
+                        /* TODO: No match found - spellcheck */
                         resultElem.text("Unfortunately, your query did not match any items.")
                         $("#resultArea").append(resultElem);
                     } else {
+                        var articleNames = [];
+                        /* Fetch text extracts from Wikipedie (where applicable) */
                         for (var result in results) {
-                            resultElem
+                            if (results[result].article != null) {
+                                articleNames[result] = decodeURI(results[result].article.value);
+                                articleNames[result] = articleNames[result].replace("https://en.wikipedia.org/wiki/", "");
+                                articleNames[result] = articleNames[result].replace(/_/g, " ");
+                            }
+                        }
+                        console.log(articleNames);
+                        var extracts = await getWPExtracts(articleNames);
+                        console.log(extracts);
+                        var previous;
+                        for (var result in results) {
+                            if (results[result].person.value != previous) {
+                                if (extracts[result] != null) {
+                                    resultElem.html(extracts[result]);
+                                } else {
+                                    var name = results[result].personLabel.value;
+                                    var description = results[result].personDescription.value;
+                                    if (results[result].died == null) {
+                                        resultElem.text(name + " is " + description);
+                                    } else {
+                                        resultElem.text(name + " was " + description);
+                                    }
+                                }
+                                previous = results[result].person.value;
+                            }
+                            $("#resultArea").append(resultElem);
+                            resultElem = $("<div></div>").addClass("result_elem");
                         }
                     }
                 } else {
-                    resultElem.text("Unable to load data from API, please check your internet"
-                        + "and try again later.");
+                    /* API request failed - display error message */
+                    resultElem.text("Unable to load data from API, please check your internet "
+                        + "connection and try again later.");
                     resultElem.css("color", "red");
+                    $("#resultArea").append(resultElem);
                 }
                 break;
         }
@@ -89,6 +122,10 @@ jQuery(function($) {
     }
 
     function getWPExtracts(titles) {
+        var filteredTitles = titles.filter(function(elem) {
+            return elem != null;
+        });
+        var joinedTitles = filteredTitles.join("|");
         return new Promise(function(resolve, reject) {
             $.ajax({
     			type: 'POST',
@@ -100,13 +137,21 @@ jQuery(function($) {
     				exintro: '1',
     				exlimit: '20',
     				exsectionformat: 'plain',
-    				titles: titles,
+    				titles: joinedTitles,
     				origin: '*'
     			},
     			dataType: 'json',
     			timeout: 5000,
     			success: function(jsondata) {
-                    resolve(jsondata);
+                    var extracts = [];
+                    for (var i = 0; i < titles.length; i++) {
+                        for (var page in jsondata.query.pages) {
+                            if (jsondata.query.pages[page].title == titles[i]) {
+                                extracts[i] = jsondata.query.pages[page].extract;
+                            }
+                        }
+                    }
+                    resolve(extracts);
                 },
                 error: function() {
                     reject();
