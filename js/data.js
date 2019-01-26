@@ -73,18 +73,21 @@ var data = {
             ORDER BY DESC(?count)`
     },
     2: {
-        type: "genericWd",
+        type: "genericWdNoBody",
         patterns: {
-            0: /what\s+was\s+(.+?)\s+born\??$/i,
+            0: /when\s+was\s+(.+?)\s+born\??$/i,
             1: /what\s+is\s+the\s+date\s+of\s+birth\s+of\s+(.+?)\??$/i
         },
         inputs: {
             0: "$searchedObject"
         },
-        results: {
+        replacements: {
             0: "born"
         },
-        output: "$searchedObject was born on $born",
+        replacementTypes: {
+            0: "date"
+        },
+        header: "$searchedObject was born on $born.",
         query: `
             SELECT ?object ?objectLabel ?objectDescription ?article ?born ?picture (COUNT(DISTINCT ?sitelink) AS ?count) WHERE {
               ?object rdfs:label|skos:altLabel "$searchedObject"@en .

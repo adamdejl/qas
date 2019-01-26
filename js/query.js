@@ -84,13 +84,13 @@ jQuery(function($) {
                 var results = await getResultFromWd(queryData.query, queryData.inputs, queryInputs);
                 await showWdAndWpResults(results);
                 break;
-            case "genericWd":
+            case "genericWdNoBody":
                 var results = await getResultFromWd(queryData.query, queryData.inputs, queryInputs);
-                break;                
+                showWdResultsNoBody(results, queryData, queryInputs);
+                break;
             case "news":
                 await(showNews(queryInputs));
                 break;
-
         }
         hideLoadingSpinner();
         showResults();
@@ -104,18 +104,14 @@ jQuery(function($) {
         return new Promise(async function(resolve, reject) {
             var originalSparqlQuery = sparqlQuery;
             for (var input in inputs) {
-                console.log(inputs[input]);
-                console.log(values[input]);
                 sparqlQuery = sparqlQuery.replace(inputs[input], values[input]);
             }
-            console.log(sparqlQuery);
             try {
                 var response = await getWDResponse(sparqlQuery);
             } catch (error) {
                 showApiConnectionError();
                 return;
             }
-            console.log(response);
             /* API request succeeded */
             var results = response.results.bindings;
             if (results.length == 0) {
@@ -159,79 +155,116 @@ jQuery(function($) {
     }
 
     /*
+     * Shows results fetched only from Wikidata
+     * Used for queries with short responses that fit to the header only
+     * Disables expansion of the body of the resultElems
+     */
+    function showWdResultsNoBody (results, queryData, queryInputs) {
+        var resultElem = $("<li></li>");
+        var genericHeaderText = queryData.header;
+        var previous;
+        for (var result in results) {
+            var r = results[result];
+            if (r.object.value != previous) {
+                var resultHeader = $("<div></div>").addClass("collapsible-header");
+                var resultBody = $("<div></div>").addClass("collapsible-body");
+                var headerText = genericHeaderText;
+
+                console.log(r);
+                for (var replacement in queryData.replacements) {
+                    var replacementName = queryData.replacements[replacement];
+                    var replacementType = queryData.replacementTypes[replacement];
+                    var val = r[replacementName].value;
+                    switch (replacementType) {
+                        case "date":
+                            var date = new Date(val);
+                            val = date.toLocaleDateString();
+                            break;
+                    }
+                    headerText = headerText.replace("$" + replacementName, val);
+                }
+                for (var input in queryData.inputs) {
+                    headerText = headerText.replace(queryData.inputs[input], queryInputs[input]);
+                }
+                resultHeader.text(headerText);
+                resultElem.append(resultHeader);
+                resultElem.append(resultBody);
+                $("#resultArea").append(resultElem);
+                resultElem = $("<li></li>");
+                previous = r.object.value;
+            }
+        }
+    }
+
+    /*
      * Shows results fetched from Wikidata and Wikipedia
      * Used for queries of type "who and "what"
      * Excepts parameter result corresponding to results.bindings in json returned from WD
      */
-    function showWdAndWpResults (results) {
-        return new Promise(async function(resolve, reject) {
-            var resultElem = $("<li></li>");
-            var articleNames = [];
-            /* Fetch text extracts from Wikipedia (where applicable) */
-            for (var result in results) {
-                if (results[result].article != null) {
-                    articleNames[result] = decodeURI(results[result].article.value);
-                    articleNames[result] = articleNames[result].replace("https://en.wikipedia.org/wiki/", "");
-                    articleNames[result] = articleNames[result].replace(/_/g, " ");
-                }
+    async function showWdAndWpResults (results) {
+        var resultElem = $("<li></li>");
+        var articleNames = [];
+        /* Fetch text extracts from Wikipedia (where applicable) */
+        for (var result in results) {
+            if (results[result].article != null) {
+                articleNames[result] = decodeURI(results[result].article.value);
+                articleNames[result] = articleNames[result].replace("https://en.wikipedia.org/wiki/", "");
+                articleNames[result] = articleNames[result].replace(/_/g, " ");
             }
-            try {
-                var extracts = await getWPExtracts(articleNames);
-            } catch (error) {
-                showApiConnectionError();
-                return resolve();
-            }
-            /* Show results */
-            var previous;
-            console.log(results);
-            for (var result in results) {
-                var resultHeader = $("<div></div>").addClass("collapsible-header");
-                var resultBody = $("<div></div>").addClass("collapsible-body");
-                var r = results[result];
-                if (r.object.value != previous) {
-                    if (extracts[result] != null) {
-                        /* Show available Wikipedia extract */
-                        if (r.objectDescription != null) {
-                            resultHeader.text(r.objectLabel.value + " (" + r.objectDescription.value + ")");
-                        } else {
-                            resultHeader.text(r.objectLabel.value);
-                        }
-                        console.log(r);
-                        if (r.picture && r.picture.type === "uri") {
-                            const uri = r.picture.value;
-                            const image = $("<img />").attr("src", uri)
-                                .css({
-                                    width: "30%",
-                                    float: "left",
-                                    marginRight: "16px",
-                                    marginTop: "16px"
-                                });
-                            resultBody.append(image)
-                        }
-                        resultBody.append(extracts[result]);
+        }
+        try {
+            var extracts = await getWPExtracts(articleNames);
+        } catch (error) {
+            showApiConnectionError();
+            return;
+        }
+        /* Show results */
+        var previous;
+        for (var result in results) {
+            var resultHeader = $("<div></div>").addClass("collapsible-header");
+            var resultBody = $("<div></div>").addClass("collapsible-body");
+            var r = results[result];
+            if (r.object.value != previous) {
+                if (extracts[result] != null) {
+                    /* Show available Wikipedia extract */
+                    if (r.objectDescription != null) {
+                        resultHeader.text(r.objectLabel.value + " (" + r.objectDescription.value + ")");
                     } else {
-                        /* Show Wikidata description */
-                        if (r.objectDescription == null) {
-                            continue;
-                        }
-                        var name = r.objectLabel.value;
-                        var description = r.objectDescription.value;
-                        resultHeader.text(name);
-                        if (r.died == null) {
-                            resultBody.text(name + " is " + description);
-                        } else {
-                            resultBody.text(name + " was " + description);
-                        }
+                        resultHeader.text(r.objectLabel.value);
                     }
-                    previous = r.object.value;
-                    resultElem.append(resultHeader);
-                    resultElem.append(resultBody);
-                    $("#resultArea").append(resultElem);
-                    resultElem = $("<li></li>");
+                    if (r.picture && r.picture.type === "uri") {
+                        const uri = r.picture.value;
+                        const image = $("<img />").attr("src", uri)
+                            .css({
+                                width: "30%",
+                                float: "left",
+                                marginRight: "16px",
+                                marginTop: "16px"
+                            });
+                        resultBody.append(image)
+                    }
+                    resultBody.append(extracts[result]);
+                } else {
+                    /* Show Wikidata description */
+                    if (r.objectDescription == null) {
+                        continue;
+                    }
+                    var name = r.objectLabel.value;
+                    var description = r.objectDescription.value;
+                    resultHeader.text(name);
+                    if (r.died == null) {
+                        resultBody.text(name + " is " + description);
+                    } else {
+                        resultBody.text(name + " was " + description);
+                    }
                 }
+                previous = r.object.value;
+                resultElem.append(resultHeader);
+                resultElem.append(resultBody);
+                $("#resultArea").append(resultElem);
+                resultElem = $("<li></li>");
             }
-            resolve();
-        });
+        }
     }
 
     function showApiConnectionError() {
