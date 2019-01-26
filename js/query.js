@@ -1,6 +1,9 @@
 "use strict"
 
 jQuery(function($) {
+
+    $(".collapsible").collapsible();
+
     $("#querySubmit").click(function() {
         processQuery($("#queryInput").val());
     });
@@ -10,6 +13,14 @@ jQuery(function($) {
             processQuery($("#queryInput").val());
         }
     });
+
+    function showResults() {
+        $("#resultArea").show();
+    }
+
+    function hideResults() {
+        $("#resultArea").hide();
+    }
 
     function showLoadingSpinner() {
         $("#loadingSpinner").css("display", "flex");
@@ -25,6 +36,7 @@ jQuery(function($) {
          * Store list of required inputs in queryInputs
          * Update matched to true in case of match
          */
+        hideResults();
         showLoadingSpinner();
 
         var queryData;
@@ -51,7 +63,7 @@ jQuery(function($) {
         switch (queryData.type) {
             case "who":
                 var sparqlQuery = queryData.query.replace(queryData.inputs[0], queryInputs[0])
-                var resultElem = $("<div></div>").addClass("result_elem");
+                var resultElem = $("<li></li>");
                 var success;
                 try {
                     var response = await getWDResponse(sparqlQuery);
@@ -68,7 +80,7 @@ jQuery(function($) {
                         $("#resultArea").append(resultElem);
                     } else {
                         var articleNames = [];
-                        /* Fetch text extracts from Wikipedie (where applicable) */
+                        /* Fetch text extracts from Wikipedia (where applicable) */
                         for (var result in results) {
                             if (results[result].article != null) {
                                 articleNames[result] = decodeURI(results[result].article.value);
@@ -81,22 +93,28 @@ jQuery(function($) {
                         console.log(extracts);
                         var previous;
                         for (var result in results) {
+                            var resultHeader = $("<div></div>").addClass("collapsible-header");
+                            var resultBody = $("<div></div>").addClass("collapsible-body");
                             if (results[result].person.value != previous) {
                                 if (extracts[result] != null) {
-                                    resultElem.html(extracts[result]);
+                                    resultHeader.text(articleNames[result]);
+                                    resultBody.html(extracts[result]);
                                 } else {
                                     var name = results[result].personLabel.value;
                                     var description = results[result].personDescription.value;
+                                    resultHeader.text(name);
                                     if (results[result].died == null) {
-                                        resultElem.text(name + " is " + description);
+                                        resultBody.text(name + " is " + description);
                                     } else {
-                                        resultElem.text(name + " was " + description);
+                                        resultBody.text(name + " was " + description);
                                     }
                                 }
                                 previous = results[result].person.value;
                             }
+                            resultElem.append(resultHeader);
+                            resultElem.append(resultBody);
                             $("#resultArea").append(resultElem);
-                            resultElem = $("<div></div>").addClass("result_elem");
+                            resultElem = $("<li></li>");
                         }
                     }
                 } else {
@@ -110,6 +128,7 @@ jQuery(function($) {
         }
 
         hideLoadingSpinner();
+        showResults();
     }
 
     function getWDResponse(sparqlQuery) {
