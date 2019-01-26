@@ -110,14 +110,10 @@ var data = {
     3: {
         type: "news",
         patterns: {
-          0: /tell me the (.+?) from (.+?)\.?$/i,
-          1: /what are the (.+?) from (.+?)\??$/i,
-          2: /what are (.+?) from (.+?)\??$/i,
-          3: /show me (.+?) from (.+?)\.?$/i,
-          4: /show (.+?) from (.+?)\.?$/i,
-          5: /show the (.+?) from (.+?)\.?$/i,
-          6: /show me the (.+?) from (.+?)\.?$/i,
-          7: /what are the (.+?) of (.+?)\??$/i,
+          0: /tell (?:me the|me) (.+?) (?:from|of) (.+?)\.?$/i,
+          1: /what (?:are the|are) (.+?) (?:from|of) (.+?)\??$/i,
+          2: /show (?:me the|me|the) (.+?) (?:from|of) (.+?)\.?$/i,
+          3: /show (.+?) (?:from|of) (.+?)\.?$/i,
         },
         inputs: {
           0: "$ntype",
