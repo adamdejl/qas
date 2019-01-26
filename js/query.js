@@ -12,12 +12,25 @@ jQuery(function($) {
     });
 
     function processQuery(query) {
-        var queryMatch;
+        /* Parse the query using pre-defined database of patterns data
+         * Store data about query in queryData
+         * Store list of required inputs in queryInputs
+         * Update matched to true in case of match
+         */
+        var queryData;
         var queryInputs = [];
-        for (var i = 0; i < data.length; i++) {
-            for (var j = 0; j < data[i].patterns; j++) {
-                if (data[i].patterns[j].text(query)) {
-                    
+        var matched = false;
+        for (var i in data) {
+            if (matched) {
+                break;
+            }
+            for (var j in data[i].patterns) {
+                var reExp = data[i].patterns[j];
+                if (reExp.test(query)) {
+                    queryData = data[i];
+                    queryInputs = reExp.exec(query).slice(1);
+                    matched = true;
+                    break;
                 }
             }
         }

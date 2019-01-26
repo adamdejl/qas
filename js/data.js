@@ -4,8 +4,8 @@ var data = {
     0: {
         type: "who",
         patterns: {
-            0: "who is (.+)\??",
-            1: "who was (.+)\??"
+            0: /who is (.+?)\??$/i,
+            1: /who was (.+?)\??$/i
         },
         inputs: {
             0: "$searchedPerson"
