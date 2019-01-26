@@ -393,7 +393,7 @@ jQuery(function($) {
         ];
         const typearray = [
             "recent news", "everything", "headlines", "top-headlines", "top news", "top-headlines", "news", "top-headlines",
-            "articles", "top-headline"
+            "articles", "top-headline", "latest news", "everything"
         ]
         var i = 0
         for (i = 0; i < typearray.length; i = i + 2) {
