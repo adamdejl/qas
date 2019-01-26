@@ -47,7 +47,7 @@ var data = {
         },
         query: `
             SELECT ?object ?objectLabel ?objectDescription ?article ?ended ?picture (COUNT(DISTINCT ?sitelink) AS ?count) WHERE {
-              ?object rdfs:label|skos:altLabel "London"@en .
+              ?object rdfs:label|skos:altLabel "$searchedObject"@en .
               OPTIONAL {
                 ?article schema:isPartOf <https://en.wikipedia.org/>;
                   schema:about ?object.
@@ -105,5 +105,17 @@ var data = {
             }
             GROUP BY ?object ?objectLabel ?objectDescription ?article ?ended ?picture
             ORDER BY DESC(?count)`
+    },
+    3: {
+        type: "news",
+        patterns: {
+          0: /show me (.+?) from (.+?)$/i,
+          1: /what are the (.+?) from (.+?)$/i,
+          2: /tell me about (.+?) from (.+?)$/i,
+        },
+        inputs: {
+          0: "$ntype",
+          1: "$nsource"
+        }
     }
 }
