@@ -66,6 +66,14 @@ jQuery(function($) {
                 }
             }
         }
+
+        if (!queryData) {
+            const error = $("<p>Couldn't understand the query. Try something else.</p>");
+            showError(error);
+            hideLoadingSpinner();
+            return;
+        }
+
         /* Clear resultArea */
         $("#resultArea").text("");
         $("#resultArea").css("color", "black");
