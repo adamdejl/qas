@@ -11,12 +11,22 @@ jQuery(function($) {
         }
     });
 
+    function showLoadingSpinner() {
+        $("#loadingSpinner").css("display", "flex");
+    }
+    
+    function hideLoadingSpinner() {
+        $("#loadingSpinner").css("display", "none");
+    }
+
     async function processQuery(query) {
         /* Parse the query using pre-defined database of patterns data
          * Store data about query in queryData
          * Store list of required inputs in queryInputs
          * Update matched to true in case of match
          */
+        showLoadingSpinner();
+
         var queryData;
         var queryInputs = [];
         var matched = false;
@@ -98,6 +108,8 @@ jQuery(function($) {
                 }
                 break;
         }
+
+        hideLoadingSpinner();
     }
 
     function getWDResponse(sparqlQuery) {
