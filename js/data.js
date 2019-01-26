@@ -39,8 +39,9 @@ var data = {
     1: {
         type: "what",
         patterns: {
-            0: /what is (.+?)\??$/i,
-            1: /what was (.+?)\??$/i
+            0: /what is a (.+?)\??$/i,
+            1: /what is (.+?)\??$/i,
+            2: /what was (.+?)\??$/i
         },
         inputs: {
             0: "$searchedObject"
