@@ -84,9 +84,9 @@ jQuery(function($) {
                 var results = await getResultFromWd(queryData.query, queryData.inputs, queryInputs);
                 await showWdAndWpResults(results);
                 break;
-            case "genericWdNoBody":
+            case "genericWdNoBodySingleSubject":
                 var results = await getResultFromWd(queryData.query, queryData.inputs, queryInputs);
-                showWdResultsNoBody(results, queryData, queryInputs);
+                showWdResultsNoBodySingleSubject(results, queryData, queryInputs);
                 break;
             case "news":
                 await(showNews(queryInputs));
@@ -156,10 +156,10 @@ jQuery(function($) {
 
     /*
      * Shows results fetched only from Wikidata
-     * Used for queries with short responses that fit to the header only
+     * Used for queries with short responses that fit to the header only and require single subject
      * Disables expansion of the body of the resultElems
      */
-    function showWdResultsNoBody (results, queryData, queryInputs) {
+    function showWdResultsNoBodySingleSubject (results, queryData, queryInputs) {
         var resultElem = $("<li></li>");
         var genericHeaderText = queryData.header;
         var previous;
@@ -183,8 +183,11 @@ jQuery(function($) {
                     }
                     headerText = headerText.replace("$" + replacementName, val);
                 }
-                for (var input in queryData.inputs) {
-                    headerText = headerText.replace(queryData.inputs[input], queryInputs[input]);
+                if (r.objectDescription != null) {
+                    headerText = headerText.replace(queryData.inputs[0],
+                        r.objectLabel.value + " (" + r.objectDescription.value + ")");
+                } else {
+                    headerText = headerText.replace(queryData.inputs[0], r.objectLabel.value);
                 }
                 resultHeader.text(headerText);
                 resultElem.append(resultHeader);

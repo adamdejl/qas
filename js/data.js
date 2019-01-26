@@ -73,7 +73,7 @@ var data = {
             ORDER BY DESC(?count)`
     },
     2: {
-        type: "genericWdNoBody",
+        type: "genericWdNoBodySingleSubject",
         patterns: {
             0: /when\s+was\s+(.+?)\s+born\??$/i,
             1: /what\s+is\s+the\s+date\s+of\s+birth\s+of\s+(.+?)\??$/i
@@ -112,6 +112,45 @@ var data = {
             ORDER BY DESC(?count)`
     },
     3: {
+        type: "genericWdNoBodySingleSubject",
+        patterns: {
+            0: /when\s+did\s+(.+?)\s+die\??$/i,
+            1: /what\s+is\s+the\s+date\s+of\s+death\s+of\s+(.+?)\??$/i
+        },
+        inputs: {
+            0: "$searchedObject"
+        },
+        replacements: {
+            0: "died"
+        },
+        replacementTypes: {
+            0: "date"
+        },
+        header: "$searchedObject died on $died.",
+        query: `
+            SELECT ?object ?objectLabel ?objectDescription ?article ?died ?picture (COUNT(DISTINCT ?sitelink) AS ?count) WHERE {
+              ?object rdfs:label|skos:altLabel "$searchedObject"@en .
+              ?object wdt:P570 ?died .
+              OPTIONAL {
+                ?article schema:isPartOf <https://en.wikipedia.org/>;
+                  schema:about ?object.
+              }
+              OPTIONAL {
+                ?sitelink schema:about ?object .
+              }
+              OPTIONAL {
+                ?object wdt:P18 ?picture .
+              }
+              SERVICE wikibase:label {
+                bd:serviceParam wikibase:language "en" .
+              }
+              FILTER NOT EXISTS{?object wdt:P31 wd:Q4167410}
+              FILTER NOT EXISTS{?object wdt:P31/wdt:P279* wd:Q18616576}
+            }
+            GROUP BY ?object ?objectLabel ?objectDescription ?article ?died ?picture
+            ORDER BY DESC(?count)`
+    },
+    4: {
         type: "news",
         patterns: {
           0: /tell (?:me the|me) (.+?) (?:from|of) (.+?)\.?$/i,
