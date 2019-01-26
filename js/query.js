@@ -88,6 +88,10 @@ jQuery(function($) {
                 var results = await getResultFromWd(queryData.query, queryData.inputs, queryInputs);
                 await showWdAndWpResults(results);
                 break;
+            case "news":
+                await(showNews(queryInputs));
+                break;
+
         }
         hideLoadingSpinner();
         showResults();
@@ -376,5 +380,68 @@ jQuery(function($) {
                 }
             });
         });
+    }
+
+    async function showNews(queryInputs) {
+        var ntype = queryInputs[0];
+        var nsource = queryInputs[1].replace(/\s+/g, '-').toLowerCase();
+        const newsapikey = '54d5f0c4a6254a8bb2c3eaaf79d5a630';
+
+        /* Processing the input */
+        const sourcearray = [
+            "BBC", "bbc-news", "bbc", "bbc-news"
+        ];
+        const typearray = [
+            "recent news", "everything", "headlines", "top-headlines", "top news", "top-headlines", "news", "top-headlines",
+            "articles", "top-headline"
+        ]
+        var i = 0
+        for (i = 0; i < typearray.length; i = i + 2) {
+            if (ntype == typearray[i]) {
+                ntype = typearray[i+1];
+            }
+        };
+        for (i = 0; i < sourcearray.length; i = i + 2) {
+            if (nsource == sourcearray[i]) {
+                nsource = sourcearray[i+1];
+            }
+        };
+
+        const res1 = await fetch(`https://newsapi.org/v2/${ntype}?sources=${nsource}&apiKey=${newsapikey}`);
+        const json = await res1.json();
+        var articlearray = $.map(json, function(el) { return el });
+        articlearray.shift();
+        articlearray.shift();
+        
+        function createArticle(article) {
+            return `
+                <div>
+                    <table style="width:100%">
+                        <td style="width:30%">
+                            <img style="max-width:100%" src="${article.urlToImage}">
+                        </td>
+                        <td style="vertical-align:top">
+                            <p style="color:black">${article.description}</p>
+                            <a href="${article.url}">
+                                <p style="color:grey">Read more...</p>
+                            </a>
+                        </td>
+                    </table>                                
+                </div>
+                `;
+        }
+        
+        /* Show results */
+        for (i = 0; i < articlearray.length; i++) {
+            var resultElem = $("<li></li>");
+            var resultHeader = $("<div></div>").addClass("collapsible-header");
+            var resultBody = $("<div></div>").addClass("collapsible-body");
+
+            resultHeader.text(articlearray[i].title);
+            resultBody.html(createArticle(articlearray[i]));
+            resultElem.append(resultHeader);
+            resultElem.append(resultBody);
+            $("#resultArea").append(resultElem);
+        }
     }
 });

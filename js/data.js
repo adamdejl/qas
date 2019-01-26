@@ -70,5 +70,17 @@ var data = {
             }
             GROUP BY ?object ?objectLabel ?objectDescription ?article ?ended ?picture
             ORDER BY DESC(?count)`
+    },
+    2: {
+      type: "news",
+      patterns: {
+        0: /show me (.+?) from (.+?)$/i,
+        1: /what are the (.+?) from (.+?)$/i,
+        2: /tell me about (.+?) from (.+?)$/i,
+      },
+      inputs: {
+        0: "$ntype",
+        1: "$nsource"
+      }
     }
 }
