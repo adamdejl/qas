@@ -129,26 +129,31 @@ jQuery(function($) {
                     var resultBody = $("<div></div>").addClass("collapsible-body");
                     if (results[result].person.value != previous) {
                         if (extracts[result] != null) {
+                            var r = results[result];
                             /* Show available Wikipedia extract */
-                            resultHeader.text(articleNames[result]);
+                            if (r.personDescription != null) {
+                                resultHeader.text(r.personLabel.value + " (" + r.personDescription.value + ")");
+                            } else {
+                                resultHeader.text(r.personLabel.value);
+                            }
                             resultBody.html(extracts[result]);
                         } else {
                             /* Show Wikidata description */
-                            var name = results[result].personLabel.value;
-                            var description = results[result].personDescription.value;
+                            var name = r.personLabel.value;
+                            var description = r.personDescription.value;
                             resultHeader.text(name);
-                            if (results[result].died == null) {
+                            if (r.died == null) {
                                 resultBody.text(name + " is " + description);
                             } else {
                                 resultBody.text(name + " was " + description);
                             }
                         }
-                        previous = results[result].person.value;
+                        previous = r.person.value;
+                        resultElem.append(resultHeader);
+                        resultElem.append(resultBody);
+                        $("#resultArea").append(resultElem);
+                        resultElem = $("<li></li>");
                     }
-                    resultElem.append(resultHeader);
-                    resultElem.append(resultBody);
-                    $("#resultArea").append(resultElem);
-                    resultElem = $("<li></li>");
                 }
                 break;
         }
