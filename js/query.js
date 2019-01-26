@@ -88,8 +88,8 @@ jQuery(function($) {
         });
     }
 
-    fuction getWPExtracts(titles) {
-        return new Promise(fundtion(resolve, reject) {
+    function getWPExtracts(titles) {
+        return new Promise(function(resolve, reject) {
             $.ajax({
     			type: 'POST',
     			url: "https://en.wikipedia.org/w/api.php",
