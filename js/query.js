@@ -84,14 +84,18 @@ jQuery(function($) {
                 var results = await getResultFromWd(queryData.query, queryData.inputs, queryInputs);
                 await showWdAndWpResults(results);
                 break;
+            case "what":
+                var results = await getResultFromWd(queryData.query, queryData.inputs, queryInputs);
+                await showWdAndWpResults(results);
+                break;
         }
         hideLoadingSpinner();
         showResults();
     }
 
     /*
-     * Fetches results from Wikidata based on the specified query, names of input values
-       and corresponding values
+     * Fetches results from Wikidata based on the specified query, list of namess of input values
+       and list of corresponding values
      */
     function getResultFromWd(sparqlQuery, inputs, values) {
         return new Promise(async function(resolve, reject) {
