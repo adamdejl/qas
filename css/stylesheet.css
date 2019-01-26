@@ -22,6 +22,10 @@
     font-weight: bold;
 }
 
+.collapsible-body {
+    overflow: hidden;
+}
+
 #errorView {
     text-align: center;
 }

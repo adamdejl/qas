@@ -189,7 +189,19 @@ jQuery(function($) {
                         } else {
                             resultHeader.text(r.objectLabel.value);
                         }
-                        resultBody.html(extracts[result]);
+                        console.log(r);
+                        if (r.picture && r.picture.type === "uri") {
+                            const uri = r.picture.value;
+                            const image = $("<img />").attr("src", uri)
+                                .css({
+                                    width: "30%",
+                                    float: "left",
+                                    marginRight: "16px",
+                                    marginTop: "16px"
+                                });
+                            resultBody.append(image)
+                        }
+                        resultBody.append(extracts[result]);
                     } else {
                         /* Show Wikidata description */
                         if (r.objectDescription == null) {
