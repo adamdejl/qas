@@ -1,0 +1,11 @@
+h1 {text-align: center; font-family: sans-serif; }
+#inputArea {text-align: center; margin: 10px 10px; }
+#queryInput {padding: 10px 10px; }
+#querySubmit {padding: 11px 11px; background-color: #0C80E5;
+              border: none; color: white; }
+#outputArea {margin: 10px 10px; border-radius: 20px;
+             border: 2px solid #0C80E5; padding: 20px; width: 75%;
+             margin: auto;}
+#loadingArea {text-align: center; vertical-align: middle; padding: 10px 10px;
+              display: flex; justify-content: center; align-items: center;}
+#loadingImg {padding: 0px 10px; }
