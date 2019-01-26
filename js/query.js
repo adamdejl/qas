@@ -424,7 +424,7 @@ jQuery(function($) {
 
         /* Processing the input */
         const sourcearray = [
-            "BBC", "bbc-news", "bbc", "bbc-news"
+            "BBC", "bbc-news", "bbc", "bbc-news", "the-guardian", "the-guardian-uk", "business-insider", "business-insider-uk"
         ];
         const typearray = [
             "recent news", "everything", "headlines", "top-headlines", "top news", "top-headlines", "news", "top-headlines",
