@@ -4,8 +4,8 @@ var data = {
     0: {
         type: "whoOrWhat",
         patterns: {
-            0: /who is (.+?)\??$/i,
-            1: /who was (.+?)\??$/i
+            0: /who\s+is\s+(.+?)\??$/i,
+            1: /who\s+was\s+(.+?)\??$/i
         },
         inputs: {
             0: "$searchedObject"
@@ -39,8 +39,9 @@ var data = {
     1: {
         type: "whoOrWhat",
         patterns: {
-            0: /what is (.+?)\??$/i,
-            1: /what was (.+?)\??$/i
+            0: /what\s+is\s+a\s+(.+?)\??$/i,
+            1: /what\s+is\s+(.+?)\??$/i,
+            2: /what\s+was\s+(.+?)\??$/i
         },
         inputs: {
             0: "$searchedObject"
@@ -74,8 +75,8 @@ var data = {
     2: {
         type: "genericWd",
         patterns: {
-            0: /what was (.+?) born\??$/i,
-            1: /what is the date of birth of (.+?)\??$/i
+            0: /what\s+was\s+(.+?)\s+born\??$/i,
+            1: /what\s+is\s+the\s+date\s+of\s+birth\s+of\s+(.+?)\??$/i
         },
         inputs: {
             0: "$searchedObject"
@@ -110,9 +111,14 @@ var data = {
     3: {
         type: "news",
         patterns: {
-          0: /show me (.+?) from (.+?)$/i,
-          1: /what are the (.+?) from (.+?)$/i,
-          2: /tell me about (.+?) from (.+?)$/i,
+          0: /tell\s+me\s+the\s+(.+?)\s+from\s+(.+?)\.?$/i,
+          1: /what\s+are\s+the\s+(.+?)\s+from\s+(.+?)\??$/i,
+          2: /what\s+are\s+(.+?)\s+from\s+(.+?)\??$/i,
+          3: /show\s+me\s+(.+?)\s+from\s+(.+?)\.?$/i,
+          4: /show\s+(.+?)\s+from\s+(.+?)\.?$/i,
+          5: /show\s+the\s+(.+?)\s+from\s+(.+?)\.?$/i,
+          6: /show\s+me\s+the\s+(.+?)\s+from\s+(.+?)\.?$/i,
+          7: /what\s+are\s+the\s+(.+?)\s+of\s+(.+?)\??$/i,
         },
         inputs: {
           0: "$ntype",
