@@ -1,7 +1,7 @@
 # QAS
 Question Answering System
 
-A single web application that uses natural language processing to evaluate input queries and return results. It uses the WikiData database for general queries and a news API for news related queries:
+A web application that uses natural language processing to evaluate input queries and return results. It uses the WikiData database for general queries and a news API for news related queries:
 
 Example of things you can ask QAS:
 - Who was Albert Einstein?
