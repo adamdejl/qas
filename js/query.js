@@ -143,12 +143,13 @@ jQuery(function($) {
                 }
                 /* Show results */
                 var previous;
+                console.log(results);
                 for (var result in results) {
                     var resultHeader = $("<div></div>").addClass("collapsible-header");
                     var resultBody = $("<div></div>").addClass("collapsible-body");
-                    if (results[result].person.value != previous) {
+                    var r = results[result];
+                    if (r.person.value != previous) {
                         if (extracts[result] != null) {
-                            var r = results[result];
                             /* Show available Wikipedia extract */
                             if (r.personDescription != null) {
                                 resultHeader.text(r.personLabel.value + " (" + r.personDescription.value + ")");
@@ -158,6 +159,9 @@ jQuery(function($) {
                             resultBody.html(extracts[result]);
                         } else {
                             /* Show Wikidata description */
+                            if (r.personDescription == null) {
+                                continue;
+                            }
                             var name = r.personLabel.value;
                             var description = r.personDescription.value;
                             resultHeader.text(name);
