@@ -12,14 +12,23 @@ jQuery(function($) {
     });
 
     function processQuery(query) {
-        var queryMatch;
+        var queryData;
         var queryInputs = [];
+        var matched = false;
         for (var i = 0; i < data.length; i++) {
+            if (matched) {
+                break;
+            }
             for (var j = 0; j < data[i].patterns; j++) {
-                if (data[i].patterns[j].text(query)) {
-                    
+                var reExp = data[i].patterns[j];
+                if (reExp.test(query)) {
+                    queryData = data[i];
+                    queryInputs = reExp.exec(query);
+                    break;
                 }
             }
         }
+        console.log(queryData);
+        console.log(queryInputs);
     }
 });
