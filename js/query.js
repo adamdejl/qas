@@ -82,8 +82,6 @@ jQuery(function($) {
         switch (queryData.type) {
             case "who":
                 var sparqlQuery = queryData.query.replace(queryData.inputs[0], queryInputs[0])
-                var resultElem = $("<li></li>");
-
                 try {
                     var response = await getWDResponse(sparqlQuery);
                 } catch (error) {
@@ -126,63 +124,76 @@ jQuery(function($) {
                         return;
                     }
                 }
-                var articleNames = [];
-                /* Fetch text extracts from Wikipedia (where applicable) */
-                for (var result in results) {
-                    if (results[result].article != null) {
-                        articleNames[result] = decodeURI(results[result].article.value);
-                        articleNames[result] = articleNames[result].replace("https://en.wikipedia.org/wiki/", "");
-                        articleNames[result] = articleNames[result].replace(/_/g, " ");
-                    }
-                }
-                try {
-                    var extracts = await getWPExtracts(articleNames);
-                } catch (error) {
-                    showApiConnectionError();
-                    return;
-                }
-                /* Show results */
-                var previous;
-                console.log(results);
-                for (var result in results) {
-                    var resultHeader = $("<div></div>").addClass("collapsible-header");
-                    var resultBody = $("<div></div>").addClass("collapsible-body");
-                    var r = results[result];
-                    if (r.person.value != previous) {
-                        if (extracts[result] != null) {
-                            /* Show available Wikipedia extract */
-                            if (r.personDescription != null) {
-                                resultHeader.text(r.personLabel.value + " (" + r.personDescription.value + ")");
-                            } else {
-                                resultHeader.text(r.personLabel.value);
-                            }
-                            resultBody.html(extracts[result]);
-                        } else {
-                            /* Show Wikidata description */
-                            if (r.personDescription == null) {
-                                continue;
-                            }
-                            var name = r.personLabel.value;
-                            var description = r.personDescription.value;
-                            resultHeader.text(name);
-                            if (r.died == null) {
-                                resultBody.text(name + " is " + description);
-                            } else {
-                                resultBody.text(name + " was " + description);
-                            }
-                        }
-                        previous = r.person.value;
-                        resultElem.append(resultHeader);
-                        resultElem.append(resultBody);
-                        $("#resultArea").append(resultElem);
-                        resultElem = $("<li></li>");
-                    }
-                }
+                await showWdAndWpResults(results);
                 break;
         }
 
         hideLoadingSpinner();
         showResults();
+    }
+
+    /*
+     * Shows results fetched from Wikidata and Wikipedia
+     * Used for queries of type "who and "what"
+     * Excepts parameter result corresponding to results.bindings in json returned from WD
+     */
+    function showWdAndWpResults (results) {
+        return new Promise(async function(resolve, reject) {
+            var resultElem = $("<li></li>");
+            var articleNames = [];
+            /* Fetch text extracts from Wikipedia (where applicable) */
+            for (var result in results) {
+                if (results[result].article != null) {
+                    articleNames[result] = decodeURI(results[result].article.value);
+                    articleNames[result] = articleNames[result].replace("https://en.wikipedia.org/wiki/", "");
+                    articleNames[result] = articleNames[result].replace(/_/g, " ");
+                }
+            }
+            try {
+                var extracts = await getWPExtracts(articleNames);
+            } catch (error) {
+                showApiConnectionError();
+                return resolve();
+            }
+            /* Show results */
+            var previous;
+            console.log(results);
+            for (var result in results) {
+                var resultHeader = $("<div></div>").addClass("collapsible-header");
+                var resultBody = $("<div></div>").addClass("collapsible-body");
+                var r = results[result];
+                if (r.object.value != previous) {
+                    if (extracts[result] != null) {
+                        /* Show available Wikipedia extract */
+                        if (r.objectDescription != null) {
+                            resultHeader.text(r.objectLabel.value + " (" + r.objectDescription.value + ")");
+                        } else {
+                            resultHeader.text(r.objectLabel.value);
+                        }
+                        resultBody.html(extracts[result]);
+                    } else {
+                        /* Show Wikidata description */
+                        if (r.objectDescription == null) {
+                            continue;
+                        }
+                        var name = r.objectLabel.value;
+                        var description = r.objectDescription.value;
+                        resultHeader.text(name);
+                        if (r.died == null) {
+                            resultBody.text(name + " is " + description);
+                        } else {
+                            resultBody.text(name + " was " + description);
+                        }
+                    }
+                    previous = r.object.value;
+                    resultElem.append(resultHeader);
+                    resultElem.append(resultBody);
+                    $("#resultArea").append(resultElem);
+                    resultElem = $("<li></li>");
+                }
+            }
+            resolve();
+        });
     }
 
     function showApiConnectionError() {
