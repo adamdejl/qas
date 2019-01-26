@@ -8,32 +8,67 @@ var data = {
             1: /who was (.+?)\??$/i
         },
         inputs: {
-            0: "$searchedPerson"
+            0: "$searchedObject"
         },
         query: `
-            SELECT ?person ?personLabel ?personDescription ?article ?died ?picture (COUNT(DISTINCT ?sitelink) AS ?count) WHERE {
-              ?person rdfs:label|skos:altLabel "$searchedPerson"@en .
+            SELECT ?object ?objectLabel ?objectDescription ?article ?ended ?picture (COUNT(DISTINCT ?sitelink) AS ?count) WHERE {
+              ?object rdfs:label|skos:altLabel "$searchedObject"@en .
               OPTIONAL {
                 ?article schema:isPartOf <https://en.wikipedia.org/>;
-                  schema:about ?person.
+                  schema:about ?object.
               }
               OPTIONAL {
-                ?person wdt:P570 ?died .
+                ?object wdt:P570 ?ended .
               }
               OPTIONAL {
-                ?sitelink schema:about ?person .
+                ?sitelink schema:about ?object .
               }
               OPTIONAL {
-                ?person wdt:P18 ?picture .
+                ?object wdt:P18 ?picture .
               }
               SERVICE wikibase:label {
                 bd:serviceParam wikibase:language "en" .
               }
-              {FILTER EXISTS{?person wdt:P31 wd:Q5}}
+              {FILTER EXISTS{?object wdt:P31 wd:Q5}}
               UNION
-              {FILTER EXISTS{?person wdt:P31/wdt:P279* wd:Q95074}}
+              {FILTER EXISTS{?object wdt:P31/wdt:P279* wd:Q95074}}
             }
-            GROUP BY ?person ?personLabel ?personDescription ?article ?died ?picture
+            GROUP BY ?object ?objectLabel ?objectDescription ?article ?ended ?picture
+            ORDER BY DESC(?count)`
+    },
+    1: {
+        type: "what",
+        patterns: {
+            0: /what is (.+?)\??$/i,
+            1: /what was (.+?)\??$/i
+        },
+        inputs: {
+            0: "$searchedObject"
+        },
+        query: `
+            SELECT ?object ?objectLabel ?objectDescription ?article ?ended ?picture (COUNT(DISTINCT ?sitelink) AS ?count) WHERE {
+              ?object rdfs:label|skos:altLabel "London"@en .
+              OPTIONAL {
+                ?article schema:isPartOf <https://en.wikipedia.org/>;
+                  schema:about ?object.
+              }
+              OPTIONAL {
+                ?object wdt:P576 ?ended .
+              }
+              OPTIONAL {
+                ?sitelink schema:about ?object .
+              }
+              OPTIONAL {
+                ?object wdt:P18 ?picture .
+              }
+              SERVICE wikibase:label {
+                bd:serviceParam wikibase:language "en" .
+              }
+              FILTER NOT EXISTS{?object wdt:P31 wd:Q5}
+              FILTER NOT EXISTS{?object wdt:P31 wd:Q4167410}
+              FILTER NOT EXISTS{?object wdt:P31/wdt:P279* wd:Q18616576}
+            }
+            GROUP BY ?object ?objectLabel ?objectDescription ?article ?ended ?picture
             ORDER BY DESC(?count)`
     }
 }
