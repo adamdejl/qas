@@ -14,7 +14,7 @@ jQuery(function($) {
     function showLoadingSpinner() {
         $("#loadingSpinner").css("display", "flex");
     }
-    
+
     function hideLoadingSpinner() {
         $("#loadingSpinner").css("display", "none");
     }
@@ -52,63 +52,98 @@ jQuery(function($) {
             case "who":
                 var sparqlQuery = queryData.query.replace(queryData.inputs[0], queryInputs[0])
                 var resultElem = $("<div></div>").addClass("result_elem");
-                var success;
                 try {
                     var response = await getWDResponse(sparqlQuery);
-                    success = true;
                 } catch (error) {
-                    success = false;
+                    showApiConnectionError();
+                    return;
                 }
-                if (success) {
-                    /* API request succeeded */
-                    var results = response.results.bindings;
-                    if (results.length == 0) {
-                        /* TODO: No match found - spellcheck */
+                /* API request succeeded */
+                var results = response.results.bindings;
+                if (results.length == 0) {
+                    /* No match found - spellcheck */
+                    try {
+                        var spellchecked = await spellCheck(queryInputs[0]);
+                    } catch (error) {
+                        showApiConnectionError();
+                        return;
+                    }
+                    console.log(spellchecked);
+                    if (spellchecked == null) {
+                        /* No element found */
                         resultElem.text("Unfortunately, your query did not match any items.")
                         $("#resultArea").append(resultElem);
-                    } else {
-                        var articleNames = [];
-                        /* Fetch text extracts from Wikipedie (where applicable) */
-                        for (var result in results) {
-                            if (results[result].article != null) {
-                                articleNames[result] = decodeURI(results[result].article.value);
-                                articleNames[result] = articleNames[result].replace("https://en.wikipedia.org/wiki/", "");
-                                articleNames[result] = articleNames[result].replace(/_/g, " ");
-                            }
-                        }
-                        console.log(articleNames);
-                        var extracts = await getWPExtracts(articleNames);
-                        console.log(extracts);
-                        var previous;
-                        for (var result in results) {
-                            if (results[result].person.value != previous) {
-                                if (extracts[result] != null) {
-                                    resultElem.html(extracts[result]);
-                                } else {
-                                    var name = results[result].personLabel.value;
-                                    var description = results[result].personDescription.value;
-                                    if (results[result].died == null) {
-                                        resultElem.text(name + " is " + description);
-                                    } else {
-                                        resultElem.text(name + " was " + description);
-                                    }
-                                }
-                                previous = results[result].person.value;
-                            }
-                            $("#resultArea").append(resultElem);
-                            resultElem = $("<div></div>").addClass("result_elem");
-                        }
+                        hideLoadingSpinner();
+                        return;
                     }
-                } else {
-                    /* API request failed - display error message */
-                    resultElem.text("Unable to load data from API, please check your internet "
-                        + "connection and try again later.");
-                    resultElem.css("color", "red");
+                    /* Match found during spellcheck - try to start again with new subject */
+                    sparqlQuery = queryData.query.replace(queryData.inputs[0], spellchecked)
+                    try {
+                        var response = await getWDResponse(sparqlQuery);
+                    } catch (error) {
+                        showApiConnectionError();
+                        return;
+                    }
+                    /* API request succeeded (again) */
+                    var results = response.results.bindings;
+                    if (results.length == 0) {
+                        /* No match found even with spellcheck */
+                        resultElem.text("Unfortunately, your query did not match any items.")
+                        $("#resultArea").append(resultElem);
+                        hideLoadingSpinner();
+                        return;
+                    }
+                }
+                var articleNames = [];
+                /* Fetch text extracts from Wikipedia (where applicable) */
+                for (var result in results) {
+                    if (results[result].article != null) {
+                        articleNames[result] = decodeURI(results[result].article.value);
+                        articleNames[result] = articleNames[result].replace("https://en.wikipedia.org/wiki/", "");
+                        articleNames[result] = articleNames[result].replace(/_/g, " ");
+                    }
+                }
+                try {
+                    var extracts = await getWPExtracts(articleNames);
+                } catch (error) {
+                    showApiConnectionError();
+                    return;
+                }
+                /* Show results */
+                var previous;
+                for (var result in results) {
+                    if (results[result].person.value != previous) {
+                        if (extracts[result] != null) {
+                            /* Show available Wikipedia extract */
+                            resultElem.html(extracts[result]);
+                        } else {
+                            /* Show Wikidata description */
+                            var name = results[result].personLabel.value;
+                            var description = results[result].personDescription.value;
+                            if (results[result].died == null) {
+                                resultElem.text(name + " is " + description);
+                            } else {
+                                resultElem.text(name + " was " + description);
+                            }
+                        }
+                        previous = results[result].person.value;
+                    }
                     $("#resultArea").append(resultElem);
+                    resultElem = $("<div></div>").addClass("result_elem");
                 }
                 break;
         }
 
+        hideLoadingSpinner();
+    }
+
+    function showApiConnectionError() {
+        $("#resultArea").text("");
+        var resultElem = $("<div></div>").addClass("result_elem");
+        resultElem.text("Unable to load data from API, please check your internet "
+            + "connection and try again later.");
+        resultElem.css("color", "red");
+        $("#resultArea").append(resultElem);
         hideLoadingSpinner();
     }
 
@@ -127,7 +162,7 @@ jQuery(function($) {
                     resolve(jsondata);
                 },
                 error: function() {
-                    reject();
+                    reject("Unable to load data from API");
                 }
             });
         });
@@ -166,7 +201,88 @@ jQuery(function($) {
                     resolve(extracts);
                 },
                 error: function() {
-                    reject();
+                    reject("Unable to load infromation from API");
+                }
+            });
+        });
+    }
+
+    function spellCheck(subject) {
+        return new Promise(async function(resolve, reject) {
+            try {
+                var spellchecked = await spellCheckOnWikidata(subject);
+                if (spellchecked != null) {
+                    return resolve(spellchecked);
+                }
+                spellchecked = await spellCheckOnWikipedia(subject);
+                if (spellchecked != null) {
+                    spellchecked = await spellCheckOnWikidata(spellchecked);
+                    return resolve(spellchecked);
+                }
+                resolve(null);
+            } catch (error) {
+                reject("Unable to load information from API");
+            }
+        });
+    }
+
+    function spellCheckOnWikidata(subject) {
+        return new Promise(function(resolve, reject) {
+            /* Attempt to search on Wikidata */
+            $.ajax({
+        		type: 'POST',
+        		url: "https://www.wikidata.org/w/api.php",
+        		data: {
+        			format: 'json',
+        			action: 'wbsearchentities',
+        			search: subject,
+        			language: 'en',
+        			origin: '*'
+        		},
+        		dataType: 'json',
+        		timeout: 5000,
+        		success: function(wdjsondata) {
+                    if (wdjsondata.search.length > 0) {
+                        resolve(wdjsondata.search[0].label);
+                    } else {
+                        resolve(null);
+                    }
+                },
+                error: function() {
+                    reject("Unable to load data from API");
+                }
+            });
+        });
+    }
+
+    function spellCheckOnWikipedia(subject) {
+        return new Promise(function(resolve, reject) {
+            /* Attempt to search on Wikipedia */
+            $.ajax({
+                type: 'POST',
+        		url: "https://en.wikipedia.org/w/api.php",
+        		data: {
+        			format: 'json',
+        			action: 'opensearch',
+        			search: subject,
+        			limit: '10',
+        			namespace: '0',
+        			origin: '*'
+        		},
+        		dataType: 'json',
+        		timeout: 5000, //5 s timeout
+        		success: function(wpjsondata) {
+                    if (wpjsondata[1].length > 0) {
+                        var bestFound = wpjsondata[1][0];
+                        bestFound = bestFound.replace(/\(.+?\)/g, "");
+                        bestFound = bestFound.trim();
+                        resolve(bestFound);
+                    } else {
+                        resolve(null);
+                    }
+                },
+                error: function() {
+                    reject("Unable to load data from API");
                 }
             });
         });
