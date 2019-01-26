@@ -30,12 +30,22 @@ jQuery(function($) {
         $("#loadingSpinner").css("display", "none");
     }
 
+    function showError(content) {
+        const error = $("<i class='material-icons'>error</i>");
+        $("#errorView").append(error).append(content).show();
+    }
+
+    function hideError() {
+        $("#errorView").empty().hide();
+    }
+
     async function processQuery(query) {
         /* Parse the query using pre-defined database of patterns data
          * Store data about query in queryData
          * Store list of required inputs in queryInputs
          * Update matched to true in case of match
          */
+        hideError();
         hideResults();
         showLoadingSpinner();
 
@@ -84,9 +94,11 @@ jQuery(function($) {
                     console.log(spellchecked);
                     if (spellchecked == null) {
                         /* No element found */
-                        resultElem.text("Unfortunately, your query did not match any items.")
-                        $("#resultArea").append(resultElem);
+                        var error = $("<p></p>").text("Oops, nothing here. Try another query.");
+                        // resultElem.text("Unfortunately, your query did not match any items.")
+                        // $("#resultArea").append(resultElem);
                         hideLoadingSpinner();
+                        showError(error);
                         return;
                     }
                     /* Match found during spellcheck - try to start again with new subject */
