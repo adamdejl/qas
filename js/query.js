@@ -31,6 +31,7 @@ jQuery(function($) {
     }
 
     function showError(content) {
+        hideError();
         const error = $("<i class='material-icons'>error</i>");
         $("#errorView").append(error).append(content).show();
     }
@@ -103,8 +104,6 @@ jQuery(function($) {
                     if (spellchecked == null) {
                         /* No element found */
                         var error = $("<p></p>").text("Oops, nothing here. Try another query.");
-                        // resultElem.text("Unfortunately, your query did not match any items.")
-                        // $("#resultArea").append(resultElem);
                         hideLoadingSpinner();
                         showError(error);
                         return;
@@ -121,9 +120,9 @@ jQuery(function($) {
                     var results = response.results.bindings;
                     if (results.length == 0) {
                         /* No match found even with spellcheck */
-                        resultElem.text("Unfortunately, your query did not match any items.")
-                        $("#resultArea").append(resultElem);
+                        var error = $("<p></p>").text("Oops, nothing here. Try another query.");
                         hideLoadingSpinner();
+                        showError(error);
                         return;
                     }
                 }
@@ -183,13 +182,9 @@ jQuery(function($) {
     }
 
     function showApiConnectionError() {
-        $("#resultArea").text("");
-        var resultElem = $("<div></div>").addClass("result_elem");
-        resultElem.text("Unable to load data from API, please check your internet "
-            + "connection and try again later.");
-        resultElem.css("color", "red");
-        $("#resultArea").append(resultElem);
+        var error = $("<p></p>").text("Couldn't connect to the internet. Check your connection and try again.");
         hideLoadingSpinner();
+        showError(error);
     }
 
     function getWDResponse(sparqlQuery) {
