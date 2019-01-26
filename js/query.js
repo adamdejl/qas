@@ -81,55 +81,74 @@ jQuery(function($) {
         /* Process the given type of query */
         switch (queryData.type) {
             case "who":
-                var sparqlQuery = queryData.query.replace(queryData.inputs[0], queryInputs[0])
+                var results = await getResultFromWd(queryData.query, queryData.inputs, queryInputs);
+                await showWdAndWpResults(results);
+                break;
+        }
+        hideLoadingSpinner();
+        showResults();
+    }
+
+    /*
+     * Fetches results from Wikidata based on the specified query, names of input values
+       and corresponding values
+     */
+    function getResultFromWd(sparqlQuery, inputs, values) {
+        return new Promise(async function(resolve, reject) {
+            var originalSparqlQuery = sparqlQuery;
+            for (var input in inputs) {
+                console.log(inputs[input]);
+                console.log(values[input]);
+                sparqlQuery = sparqlQuery.replace(inputs[input], values[input]);
+            }
+            console.log(sparqlQuery);
+            try {
+                var response = await getWDResponse(sparqlQuery);
+            } catch (error) {
+                showApiConnectionError();
+                return;
+            }
+            console.log(response);
+            /* API request succeeded */
+            var results = response.results.bindings;
+            if (results.length == 0) {
+                /* No match found - spellcheck */
+                sparqlQuery = originalSparqlQuery;
+                try {
+                    for (var input in inputs) {
+                        var spellchecked = await spellCheck(values[input]);
+                        if (spellchecked == null) {
+                            /* No element found */
+                            var error = $("<p></p>").text("Oops, nothing here. Try another query.");
+                            hideLoadingSpinner();
+                            showError(error);
+                            return;
+                        }
+                        sparqlQuery = sparqlQuery.replace(inputs[input], spellchecked);
+                    }
+                } catch (error) {
+                    showApiConnectionError();
+                    return;
+                }
+                /* Match found during spellcheck - try to start again with new subject */
                 try {
                     var response = await getWDResponse(sparqlQuery);
                 } catch (error) {
                     showApiConnectionError();
                     return;
                 }
-                /* API request succeeded */
+                /* API request succeeded (again) */
                 var results = response.results.bindings;
                 if (results.length == 0) {
-                    /* No match found - spellcheck */
-                    try {
-                        var spellchecked = await spellCheck(queryInputs[0]);
-                    } catch (error) {
-                        showApiConnectionError();
-                        return;
-                    }
-                    console.log(spellchecked);
-                    if (spellchecked == null) {
-                        /* No element found */
-                        var error = $("<p></p>").text("Oops, nothing here. Try another query.");
-                        hideLoadingSpinner();
-                        showError(error);
-                        return;
-                    }
-                    /* Match found during spellcheck - try to start again with new subject */
-                    sparqlQuery = queryData.query.replace(queryData.inputs[0], spellchecked)
-                    try {
-                        var response = await getWDResponse(sparqlQuery);
-                    } catch (error) {
-                        showApiConnectionError();
-                        return;
-                    }
-                    /* API request succeeded (again) */
-                    var results = response.results.bindings;
-                    if (results.length == 0) {
-                        /* No match found even with spellcheck */
-                        var error = $("<p></p>").text("Oops, nothing here. Try another query.");
-                        hideLoadingSpinner();
-                        showError(error);
-                        return;
-                    }
+                    /* No match found even with spellcheck */
+                    var error = $("<p></p>").text("Oops, nothing here. Try another query.");
+                    hideLoadingSpinner();
+                    showError(error);
+                    return;
                 }
-                await showWdAndWpResults(results);
-                break;
-        }
-
-        hideLoadingSpinner();
-        showResults();
+            }
+            resolve(results);
+        });
     }
 
     /*
