@@ -122,7 +122,6 @@ jQuery(function($) {
                 showWdResultsBody(results, queryData, queryInputs);
                 break;
             case "wOfWhat":
-                console.log("what of what");
                 var propertyResults = await findWdProperty(queryInputs[0]);
                 if (propertyResults == null) {
                     const error = $("<p>Couldn't understand the query. Try something else.</p>");
@@ -257,7 +256,6 @@ jQuery(function($) {
             }
 
             headerText = headerText.replace("$" + queryData.replacement, val);
-            console.log(r);
             for (var option in queryData.options) {
                 if (resultsArr.length > 1) {
                     headerText = headerText.replace(queryData.options[option], queryData.plurals[option]);
