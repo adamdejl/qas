@@ -1,5 +1,6 @@
 # QAS
 Question Answering System
+
 Live Version: [QAS](https://hasali19.github.io/qas)
 
 A web application that uses natural language processing to evaluate input queries and return results. It uses the WikiData database for general queries and a news API for news related queries:
