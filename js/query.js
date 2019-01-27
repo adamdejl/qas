@@ -88,9 +88,26 @@ jQuery(function($) {
                 var results = await getResultFromWd(queryData.query, queryData.inputs, queryInputs);
                 showWdResultsNoBody(results, queryData, queryInputs);
                 break;
-            case "genericWdNoBodyMultipleResults":
-                var results = await getResultFromWd(queryData.query, queryData.inputs, queryInputs);
-                showWdResultsNoBodyMultipleResults(results, queryData, queryInputs);
+            case "wOfWhat":
+                console.log(queryInputs[0]);
+                var propertyResults = await findWdProperty(queryInputs[0]);
+                console.log(propertyResults);
+                if (propertyResults == null) {
+                    const error = $("<p>Couldn't understand the query. Try something else.</p>");
+                    showError(error);
+                    hideLoadingSpinner();
+                    return;
+                }
+                var propertyId = propertyResults.id;
+                var propertyName = propertyResults.label;
+                /* Copy queryData and make substitutions */
+                var queryDataModified = JSON.parse(JSON.stringify(queryData));
+                queryDataModified.query = queryDataModified.query.replace("$property", propertyId);
+                queryDataModified.singulars[1] = propertyName;
+                queryDataModified.plurals[1] = propertyName + "s";
+                queryInputs = queryInputs.splice(1);
+                var results = await getResultFromWd(queryDataModified.query, queryData.inputs, queryInputs);
+                showWdResultsNoBodyMultipleResults(results, queryDataModified, queryInputs);
                 break;
             case "news":
                 await(showNews(queryInputs));
@@ -201,6 +218,7 @@ jQuery(function($) {
             } else {
                 headerText = headerText.replace(queryData.inputs[0], r.objectLabel.value);
             }
+            headerText = headerText.charAt(0).toUpperCase() + headerText.slice(1);
             resultHeader.text(headerText);
             resultElem.append(resultHeader);
             resultElem.append(resultBody);
@@ -225,7 +243,6 @@ jQuery(function($) {
                 var resultBody = $("<div></div>").addClass("collapsible-body");
                 var headerText = genericHeaderText;
 
-                console.log(r);
                 for (var replacement in queryData.replacements) {
                     var replacementName = queryData.replacements[replacement];
                     var replacementType = queryData.replacementTypes[replacement];
@@ -407,6 +424,36 @@ jQuery(function($) {
             } catch (error) {
                 reject("Unable to load information from API");
             }
+        });
+    }
+
+    function findWdProperty(subject) {
+        return new Promise(function(resolve, reject) {
+            /* Attempt to search property on Wikidata */
+            $.ajax({
+        		type: 'POST',
+        		url: "https://www.wikidata.org/w/api.php",
+        		data: {
+        			format: 'json',
+        			action: 'wbsearchentities',
+        			search: subject,
+        			language: 'en',
+                    type: 'property',
+        			origin: '*'
+        		},
+        		dataType: 'json',
+        		timeout: 5000,
+        		success: function(wdjsondata) {
+                    if (wdjsondata.search.length > 0) {
+                        resolve(wdjsondata.search[0]);
+                    } else {
+                        resolve(null);
+                    }
+                },
+                error: function() {
+                    reject("Unable to load data from API");
+                }
+            });
         });
     }
 

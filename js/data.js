@@ -2,35 +2,38 @@
 
 var data = {
     0: {
-        type: "genericWdNoBodyMultipleResults",
+        type: "wOfWhat",
         patterns: {
-            0: /who\s+is\s+the\s+director\s+of\s+(.+?)\??$/i,
-            1: /who\s+is\s+director\s+of\s+(.+?)\??$/i,
-            2: /who\s+are\s+the\s+directors\s+of\s+(.+?)\??$/i,
-            3: /who\s+are\s+directors\s+of\s+(.+?)\??$/i,
-            4: /who\s+wrote\s+(.+?)\??$/i
+            0: /what\s+is\s+the\s+(.+?)\s+of\s+(.+?)\??$/i,
+            1: /what\s+is\s+(.+?)\s+of\s+(.+?)\??$/i,
+            2: /what\s+are\s+the\s+(.+?)\s+of\s+(.+?)\??$/i,
+            3: /what\s+are\s+(.+?)\s+of\s+(.+?)\??$/i,
+            4: /who\s+is\s+the\s+(.+?)\s+of\s+(.+?)\??$/i,
+            5: /who\s+is\s+(.+?)\s+of\s+(.+?)\??$/i,
+            6: /who\s+are\s+the\s+(.+?)\s+of\s+(.+?)\??$/i,
+            7: /who\s+are\s+(.+?)\s+of\s+(.+?)\??$/i,
+            8: /(.+?)\s+of\s+(.+?)\??$/i,
+            9: /(.+?)\s+of\s+(.+?)\??$/i
         },
         inputs: {
             0: "$searchedObject"
         },
-        replacement: "directorLabel",
-        header: "$directorLabel $be the $directorNum of $searchedObject.",
+        replacement: "resultLabel",
+        header: "$resultLabel $be the $propertyNum of $searchedObject.",
         options: {
             0: "$be",
-            1: "$directorNum"
+            1: "$propertyNum"
         },
         singulars: {
-            0: "is",
-            1: "director"
+            0: "is"
         },
         plurals: {
             0: "are",
-            1: "directors"
         },
         query: `
-            SELECT ?object ?objectLabel ?objectDescription ?director ?directorLabel (COUNT(DISTINCT ?sitelink) AS ?count) WHERE {
+            SELECT ?object ?objectLabel ?objectDescription ?result ?resultLabel (COUNT(DISTINCT ?sitelink) AS ?count) WHERE {
               ?object rdfs:label|skos:altLabel "$searchedObject"@en .
-              ?object wdt:P57 ?director .
+              ?object wdt:$property ?result .
               OPTIONAL {
                 ?sitelink schema:about ?object .
               }
@@ -40,52 +43,10 @@ var data = {
               FILTER NOT EXISTS{?object wdt:P31 wd:Q4167410}
               FILTER NOT EXISTS{?object wdt:P31/wdt:P279* wd:Q18616576}
             }
-            GROUP BY ?object ?objectLabel ?objectDescription ?director ?directorLabel
+            GROUP BY ?object ?objectLabel ?objectDescription ?result ?resultLabel
             ORDER BY DESC(?count)`
     },
     1: {
-        type: "genericWdNoBodyMultipleResults",
-        patterns: {
-            0: /who\s+is\s+the\s+author\s+of\s+(.+?)\??$/i,
-            1: /who\s+is\s+author\s+of\s+(.+?)\??$/i,
-            2: /who\s+are\s+the\s+authors\s+of\s+(.+?)\??$/i,
-            3: /who\s+are\s+authors\s+of\s+(.+?)\??$/i,
-            4: /who\s+wrote\s+(.+?)\??$/i
-        },
-        inputs: {
-            0: "$searchedObject"
-        },
-        replacement: "authorLabel",
-        header: "$authorLabel $be the $authorNum of $searchedObject.",
-        options: {
-            0: "$be",
-            1: "$authorNum"
-        },
-        singulars: {
-            0: "is",
-            1: "author"
-        },
-        plurals: {
-            0: "are",
-            1: "authors"
-        },
-        query: `
-            SELECT ?object ?objectLabel ?objectDescription ?author ?authorLabel (COUNT(DISTINCT ?sitelink) AS ?count) WHERE {
-              ?object rdfs:label|skos:altLabel "$searchedObject"@en .
-              ?object wdt:P50 ?author .
-              OPTIONAL {
-                ?sitelink schema:about ?object .
-              }
-              SERVICE wikibase:label {
-                bd:serviceParam wikibase:language "en" .
-              }
-              FILTER NOT EXISTS{?object wdt:P31 wd:Q4167410}
-              FILTER NOT EXISTS{?object wdt:P31/wdt:P279* wd:Q18616576}
-            }
-            GROUP BY ?object ?objectLabel ?objectDescription ?author ?authorLabel
-            ORDER BY DESC(?count)`
-    },
-    2: {
         type: "whoOrWhat",
         patterns: {
             0: /who\s+is\s+(.+?)\??$/i,
@@ -120,7 +81,7 @@ var data = {
             GROUP BY ?object ?objectLabel ?objectDescription ?article ?ended ?picture
             ORDER BY DESC(?count)`
     },
-    3: {
+    2: {
         type: "whoOrWhat",
         patterns: {
             0: /what\s+is\s+a\s+(.+?)\??$/i,
@@ -156,7 +117,7 @@ var data = {
             GROUP BY ?object ?objectLabel ?objectDescription ?article ?ended ?picture
             ORDER BY DESC(?count)`
     },
-    4: {
+    3: {
         type: "genericWdNoBody",
         patterns: {
             0: /when\s+was\s+(.+?)\s+born\??$/i,
@@ -195,7 +156,7 @@ var data = {
             GROUP BY ?object ?objectLabel ?objectDescription ?article ?born ?picture
             ORDER BY DESC(?count)`
     },
-    5: {
+    4: {
         type: "genericWdNoBody",
         patterns: {
             0: /when\s+did\s+(.+?)\s+die\??$/i,
@@ -234,7 +195,7 @@ var data = {
             GROUP BY ?object ?objectLabel ?objectDescription ?article ?died ?picture
             ORDER BY DESC(?count)`
     },
-    6: {
+    5: {
         type: "news",
         patterns: {
           0: /tell (?:me the|me) (.+?) (?:from|of) (.+?)\.?$/i,
