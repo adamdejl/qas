@@ -252,6 +252,9 @@ jQuery(function($) {
                 headerText = headerText.replace(queryData.inputs[0], r.objectLabel.value);
             }
             headerText = headerText.charAt(0).toUpperCase() + headerText.slice(1);
+            for (var replaceValue in queryData.replaceValues) {
+                headerText = headerText.replace(queryData.replaceValues[replaceValue], queryData.replaceBy[replaceValue]);
+            }
             resultHeader.text(headerText);
             resultElem.append(resultHeader);
             $("#resultArea").append(resultElem);

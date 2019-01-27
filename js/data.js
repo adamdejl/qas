@@ -22,6 +22,14 @@ var data = {
         plurals: {
             0: "are",
         },
+        replaceValues: {
+            0: "owned by",
+            1: "childs"
+        },
+        replaceBy: {
+            0: "owner",
+            1: "children"
+        },
         query: `
             SELECT ?object ?objectLabel ?objectDescription ?result ?resultLabel (COUNT(DISTINCT ?sitelink) AS ?count) WHERE {
               ?object rdfs:label|skos:altLabel "$searchedObject"@en .
@@ -191,7 +199,9 @@ var data = {
         type: "genericWdBody",
         patterns: {
             0: /play\s+(.+?)$/i,
-            1: /please\s+play\s+(.+?)$/i
+            1: /please\s+play\s+(.+?)$/i,
+            2: /find\s+video\s+of\s+(.+?)$/i,
+            3: /play\s+video\s+of\s+(.+?)$/i
         },
         inputs: {
             0: "$searchedObject"
