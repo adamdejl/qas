@@ -84,9 +84,13 @@ jQuery(function($) {
                 var results = await getResultFromWd(queryData.query, queryData.inputs, queryInputs);
                 await showWdAndWpResults(results);
                 break;
-            case "genericWdNoBodySingleSubject":
+            case "genericWdNoBody":
                 var results = await getResultFromWd(queryData.query, queryData.inputs, queryInputs);
-                showWdResultsNoBodySingleSubject(results, queryData, queryInputs);
+                showWdResultsNoBody(results, queryData, queryInputs);
+                break;
+            case "genericWdNoBodyMultipleResults":
+                var results = await getResultFromWd(queryData.query, queryData.inputs, queryInputs);
+                showWdResultsNoBodyMultipleResults(results, queryData, queryInputs);
                 break;
             case "news":
                 await(showNews(queryInputs));
@@ -106,6 +110,7 @@ jQuery(function($) {
             for (var input in inputs) {
                 sparqlQuery = sparqlQuery.replace(inputs[input], values[input]);
             }
+            console.log(sparqlQuery);
             try {
                 var response = await getWDResponse(sparqlQuery);
             } catch (error) {
@@ -159,7 +164,57 @@ jQuery(function($) {
      * Used for queries with short responses that fit to the header only and require single subject
      * Disables expansion of the body of the resultElems
      */
-    function showWdResultsNoBodySingleSubject (results, queryData, queryInputs) {
+    function showWdResultsNoBodyMultipleResults (results, queryData, queryInputs) {
+        var resultElem = $("<li></li>");
+        var genericHeaderText = queryData.header;
+        var previous;
+        var result = 0;
+        while (results[result] != null) {
+            previous = results[result].object.value;
+            var r = results[result];
+            var resultsArr = [];
+            while (results[result] != null && results[result].object.value == previous) {
+                resultsArr.push(results[result][queryData.replacement].value);
+                result++;
+            }
+            var resultHeader = $("<div></div>").addClass("collapsible-header");
+            var resultBody = $("<div></div>").addClass("collapsible-body");
+            var headerText = genericHeaderText;
+            if (resultsArr.length > 1) {
+                var val = resultsArr.slice(0, -1).join(", ");
+                val += " and " + resultsArr[resultsArr.length - 1]
+            } else {
+                var val = resultsArr[0];
+            }
+
+            headerText = headerText.replace("$" + queryData.replacement, val);
+            for (var option in queryData.options) {
+                if (resultsArr.length > 1) {
+                    headerText = headerText.replace(queryData.options[option], queryData.plurals[option]);
+                } else {
+                    headerText = headerText.replace(queryData.options[option], queryData.singulars[option]);
+                }
+            }
+            if (r.objectDescription != null) {
+                headerText = headerText.replace(queryData.inputs[0],
+                    r.objectLabel.value + " (" + r.objectDescription.value + ")");
+            } else {
+                headerText = headerText.replace(queryData.inputs[0], r.objectLabel.value);
+            }
+            resultHeader.text(headerText);
+            resultElem.append(resultHeader);
+            resultElem.append(resultBody);
+            $("#resultArea").append(resultElem);
+            resultElem = $("<li></li>");
+        }
+    }
+
+    /*
+     * Shows results fetched only from Wikidata
+     * Used for queries with short responses that fit to the header only and require single subject
+     * Disables expansion of the body of the resultElems
+     */
+    function showWdResultsNoBody (results, queryData, queryInputs) {
         var resultElem = $("<li></li>");
         var genericHeaderText = queryData.header;
         var previous;
@@ -428,7 +483,7 @@ jQuery(function($) {
         ];
         const typearray = [
             "recent news", "everything", "headlines", "top-headlines", "top news", "top-headlines", "news", "top-headlines",
-            "articles", "top-headline", "latest news", "everything"
+            "articles", "top-headline", "latest news", "everything", "top headlines", "top-headlines"
         ]
         var i = 0
         for (i = 0; i < typearray.length; i = i + 2) {
