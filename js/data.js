@@ -300,6 +300,44 @@ var data = {
             ORDER BY DESC(?count)`
     },
     6: {
+        type: "genericWdBody",
+        patterns: {
+            0: /(?:please)?\s*show\s*(?:me)?\s*(?:the)?\s*(?:picture)?\s*(?:of)?\s*(.+?)$/i
+        },
+        inputs: {
+            0: "$searchedObject"
+        },
+        replacements: {
+            0: "picture"
+        },
+        replacementTypes: {
+            0: "string"
+        },
+        body: `<div style="text-align: center"><img src=$picture width="100%" alt="Picture of searched object"></div>`,
+        query: `
+            SELECT ?object ?objectLabel ?objectDescription ?picture (COUNT(DISTINCT ?sitelink) AS ?count) WHERE {
+              ?object rdfs:label|skos:altLabel "$searchedObject"@en .
+              ?object wdt:P18 ?picture .
+              OPTIONAL {
+                ?article schema:isPartOf <https://en.wikipedia.org/>;
+                  schema:about ?object.
+              }
+              OPTIONAL {
+                ?sitelink schema:about ?object .
+              }
+              OPTIONAL {
+                ?object wdt:P18 ?picture .
+              }
+              SERVICE wikibase:label {
+                bd:serviceParam wikibase:language "en" .
+              }
+              FILTER NOT EXISTS{?object wdt:P31 wd:Q4167410}
+              FILTER NOT EXISTS{?object wdt:P31/wdt:P279* wd:Q18616576}
+            }
+            GROUP BY ?object ?objectLabel ?objectDescription ?picture
+            ORDER BY DESC(?count)`
+    },
+    7: {
         type: "news",
         patterns: {
           0: /tell (?:me the|me) (.+?) (?:from|of) (.+?)\.?$/i,
