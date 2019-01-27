@@ -4,16 +4,8 @@ var data = {
     0: {
         type: "wOfWhat",
         patterns: {
-            0: /what\s+is\s+the\s+(.+?)\s+of\s+(.+?)\??$/i,
-            1: /what\s+is\s+(.+?)\s+of\s+(.+?)\??$/i,
-            2: /what\s+are\s+the\s+(.+?)\s+of\s+(.+?)\??$/i,
-            3: /what\s+are\s+(.+?)\s+of\s+(.+?)\??$/i,
-            4: /who\s+is\s+the\s+(.+?)\s+of\s+(.+?)\??$/i,
-            5: /who\s+is\s+(.+?)\s+of\s+(.+?)\??$/i,
-            6: /who\s+are\s+the\s+(.+?)\s+of\s+(.+?)\??$/i,
-            7: /who\s+are\s+(.+?)\s+of\s+(.+?)\??$/i,
-            8: /(.+?)\s+of\s+(.+?)\??$/i,
-            9: /(.+?)\s+of\s+(.+?)\??$/i
+            0: /(?:what|who)\s+is\s+(?:the)?\s*(.+)\s+of\s*(?:the)?\s+(.+?)\??$/i,
+            1: /(.+?)\s+of\s*(?:the)?\s+(.+?)\??$/i,
         },
         inputs: {
             0: "$searchedObject"
