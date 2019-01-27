@@ -216,7 +216,7 @@ var data = {
         type: "news",
         patterns: {
           0: /tell (?:me the|me) (.+?) (?:from|of) (.+?)\.?$/i,
-          1: /what (?:are the|are) (.+?) (?:from|of) (.+?)\??$/i,
+          1: /what (?:are the|are) (.+?) (?:from) (.+?)\??$/i,
           2: /show (?:me the|me|the) (.+?) (?:from|of) (.+?)\.?$/i,
           3: /show (.+?) (?:from|of) (.+?)\.?$/i,
         },
