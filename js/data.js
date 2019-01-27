@@ -212,9 +212,9 @@ var data = {
         replacementTypes: {
             0: "string"
         },
-        body: `<iframe width="656" height="369" src="https://www.youtube.com/embed/$youtubeId"
+        body: `<div class="row"><div class="col s8 offset-s2"><iframe width="656" height="369" src="https://www.youtube.com/embed/$youtubeId?autoplay=1"
               frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope;
-              picture-in-picture" allowfullscreen></iframe>`,
+              picture-in-picture" allowfullscreen></iframe></div></div>`,
         query: `
             SELECT ?object ?objectLabel ?objectDescription ?youtubeId (COUNT(DISTINCT ?sitelink) AS ?count) WHERE {
               ?object rdfs:label|skos:altLabel "$searchedObject"@en .
