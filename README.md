@@ -19,3 +19,5 @@ Example of things you can ask QAS:
 - Tell me news from Wired
 - Play Despacito
 - Play Firestone
+- Show me London
+- Show me the milky way
