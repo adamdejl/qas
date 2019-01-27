@@ -21,6 +21,41 @@ var aliases = {
             0: "$1"
         },
         query: "what is the population of $1"
+    },
+    3: {
+        pattern: /who\s+founded\s+(.+?)\??$/i,
+        inputs: {
+            0: "$1"
+        },
+        query: "who is the founder of $1"
+    },
+    4: {
+        pattern: /who\s+composed\s+music\s+(?:of|for)\s+(.+?)\??$/i,
+        inputs: {
+            0: "$1"
+        },
+        query: "who is the composer of $1"
+    },
+    5: {
+        pattern: /who\s+wrote\s*(?:the)\s+script\s+(?:for|of)\s+(.+?)\??$/i,
+        inputs: {
+            0: "$1"
+        },
+        query: "who is the screenwriter of $1"
+    },
+    6: {
+        pattern: /who\s+compsed\s+(.+?)\??$/i,
+        inputs: {
+            0: "$1"
+        },
+        query: "who is the composer of $1"
+    },
+    7: {
+        pattern: /who\s+wrote\s+(.+?)\??$/i,
+        inputs: {
+            0: "$1"
+        },
+        query: "who is the author of $1"
     }
 }
 
