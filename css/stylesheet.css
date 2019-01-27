@@ -18,8 +18,9 @@
     background-color: rgba(0, 0, 0, 0.5);
 }
 
-.collapsible-header {
+.result-item-header {
     font-weight: bold;
+    padding: 1rem;
 }
 
 .collapsible-body {
