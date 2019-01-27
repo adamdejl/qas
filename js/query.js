@@ -177,7 +177,7 @@ jQuery(function($) {
                 resultsArr.push(results[result][queryData.replacement].value);
                 result++;
             }
-            var resultHeader = $("<div></div>").addClass("collapsible-header");
+            var resultHeader = $("<div></div>").addClass("collapsible-header result-item-header");
             var resultBody = $("<div></div>").addClass("collapsible-body");
             var headerText = genericHeaderText;
             if (resultsArr.length > 1) {
@@ -221,8 +221,7 @@ jQuery(function($) {
         for (var result in results) {
             var r = results[result];
             if (r.object.value != previous) {
-                var resultHeader = $("<div></div>").addClass("collapsible-header");
-                var resultBody = $("<div></div>").addClass("collapsible-body");
+                var resultHeader = $("<div></div>").addClass("result-item-header");
                 var headerText = genericHeaderText;
 
                 console.log(r);
@@ -246,7 +245,6 @@ jQuery(function($) {
                 }
                 resultHeader.text(headerText);
                 resultElem.append(resultHeader);
-                resultElem.append(resultBody);
                 $("#resultArea").append(resultElem);
                 resultElem = $("<li></li>");
                 previous = r.object.value;
@@ -279,7 +277,7 @@ jQuery(function($) {
         /* Show results */
         var previous;
         for (var result in results) {
-            var resultHeader = $("<div></div>").addClass("collapsible-header");
+            var resultHeader = $("<div></div>").addClass("collapsible-header result-item-header");
             var resultBody = $("<div></div>").addClass("collapsible-body");
             var r = results[result];
             if (r.object.value != previous) {
@@ -524,7 +522,7 @@ jQuery(function($) {
         /* Show results */
         for (i = 0; i < articlearray.length; i++) {
             var resultElem = $("<li></li>");
-            var resultHeader = $("<div></div>").addClass("collapsible-header");
+            var resultHeader = $("<div></div>").addClass("collapsible-header result-item header");
             var resultBody = $("<div></div>").addClass("collapsible-body");
 
             resultHeader.text(articlearray[i].title);
