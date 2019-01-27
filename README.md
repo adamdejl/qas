@@ -7,6 +7,8 @@ Example of things you can ask QAS:
 - Who was Albert Einstein?
 - Who is Elon Musk
 - What is London?
+- Who is the director of Avatar?
+- Who is the author of the martian
 - What was Concorde
 - What are the headlines of BBC?
 - Show me the latest news from Independent.
