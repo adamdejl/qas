@@ -82,24 +82,29 @@ jQuery(function($) {
         switch (queryData.type) {
             case "whoOrWhat":
                 var results = await getResultFromWd(queryData.query, queryData.inputs, queryInputs);
+                if (results == null) {
+                    showNotFoundError();
+                }
                 await showWdAndWpResults(results);
                 break;
             case "genericWdNoBody":
                 var results = await getResultFromWd(queryData.query, queryData.inputs, queryInputs);
+                if (results == null) {
+                    showNotFoundError();
+                }
                 showWdResultsNoBody(results, queryData, queryInputs);
                 break;
             case "wOfWhat":
-                console.log(queryInputs[0]);
                 var propertyResults = await findWdProperty(queryInputs[0]);
-                console.log(propertyResults);
                 if (propertyResults == null) {
                     const error = $("<p>Couldn't understand the query. Try something else.</p>");
                     showError(error);
                     hideLoadingSpinner();
                     return;
                 }
-                var propertyId = propertyResults.id;
-                var propertyName = propertyResults.label;
+                var propertyResult = propertyResults[0];
+                var propertyId = propertyResult.id;
+                var propertyName = propertyResult.label;
                 /* Copy queryData and make substitutions */
                 var queryDataModified = JSON.parse(JSON.stringify(queryData));
                 queryDataModified.query = queryDataModified.query.replace("$property", propertyId);
@@ -107,6 +112,25 @@ jQuery(function($) {
                 queryDataModified.plurals[1] = propertyName + "s";
                 queryInputs = queryInputs.splice(1);
                 var results = await getResultFromWd(queryDataModified.query, queryData.inputs, queryInputs);
+                console.log(propertyResults);
+                if (results == null && propertyResults[1] != null) {
+                    /* Try again with different property if there is one */
+                    propertyResult = propertyResults[1];
+                    console.log(propertyResult);
+                    propertyId = propertyResult.id;
+                    propertyName = propertyResult.label;
+                    /* Copy queryData and make substitutions */
+                    queryDataModified = JSON.parse(JSON.stringify(queryData));
+                    queryDataModified.query = queryDataModified.query.replace("$property", propertyId);
+                    queryDataModified.singulars[1] = propertyName;
+                    queryDataModified.plurals[1] = propertyName + "s";
+                    results = await getResultFromWd(queryDataModified.query, queryData.inputs, queryInputs);
+                    if (results == null) {
+                        showNotFoundError();
+                        return;
+                    }
+                }
+                console.log(results);
                 showWdResultsNoBodyMultipleResults(results, queryDataModified, queryInputs);
                 break;
             case "news":
@@ -115,6 +139,13 @@ jQuery(function($) {
         }
         hideLoadingSpinner();
         showResults();
+    }
+
+    function showNotFoundError() {
+        var error = $("<p></p>").text("Oops, nothing here. Try another query.");
+        hideLoadingSpinner();
+        showError(error);
+        return;
     }
 
     /*
@@ -144,10 +175,7 @@ jQuery(function($) {
                         var spellchecked = await spellCheck(values[input]);
                         if (spellchecked == null) {
                             /* No element found */
-                            var error = $("<p></p>").text("Oops, nothing here. Try another query.");
-                            hideLoadingSpinner();
-                            showError(error);
-                            return;
+                            return resolve(null);
                         }
                         sparqlQuery = sparqlQuery.replace(inputs[input], spellchecked);
                     }
@@ -166,10 +194,7 @@ jQuery(function($) {
                 var results = response.results.bindings;
                 if (results.length == 0) {
                     /* No match found even with spellcheck */
-                    var error = $("<p></p>").text("Oops, nothing here. Try another query.");
-                    hideLoadingSpinner();
-                    showError(error);
-                    return;
+                    return resolve(null);
                 }
             }
             resolve(results);
@@ -443,7 +468,7 @@ jQuery(function($) {
         		timeout: 5000,
         		success: function(wdjsondata) {
                     if (wdjsondata.search.length > 0) {
-                        resolve(wdjsondata.search[0]);
+                        resolve(wdjsondata.search);
                     } else {
                         resolve(null);
                     }
