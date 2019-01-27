@@ -94,7 +94,15 @@ jQuery(function($) {
                 }
                 showWdResultsNoBody(results, queryData, queryInputs);
                 break;
+            case "genericWdBody":
+                var results = await getResultFromWd(queryData.query, queryData.inputs, queryInputs);
+                if (results == null) {
+                    showNotFoundError(0);
+                }
+                showWdResultsBody(results, queryData, queryInputs);
+                break;
             case "wOfWhat":
+                console.log("what of what");
                 var propertyResults = await findWdProperty(queryInputs[0]);
                 if (propertyResults == null) {
                     const error = $("<p>Couldn't understand the query. Try something else.</p>");
@@ -112,11 +120,9 @@ jQuery(function($) {
                 queryDataModified.plurals[1] = propertyName + "s";
                 queryInputs = queryInputs.splice(1);
                 var results = await getResultFromWd(queryDataModified.query, queryData.inputs, queryInputs);
-                console.log(propertyResults);
                 if (results == null && propertyResults[1] != null) {
                     /* Try again with different property if there is one */
                     propertyResult = propertyResults[1];
-                    console.log(propertyResult);
                     propertyId = propertyResult.id;
                     propertyName = propertyResult.label;
                     /* Copy queryData and make substitutions */
@@ -129,8 +135,10 @@ jQuery(function($) {
                         showNotFoundError();
                         return;
                     }
+                } else if (results == null) {
+                    showNotFoundError();
+                    return;
                 }
-                console.log(results);
                 showWdResultsNoBodyMultipleResults(results, queryDataModified, queryInputs);
                 break;
             case "news":
@@ -229,6 +237,7 @@ jQuery(function($) {
             }
 
             headerText = headerText.replace("$" + queryData.replacement, val);
+            console.log(r);
             for (var option in queryData.options) {
                 if (resultsArr.length > 1) {
                     headerText = headerText.replace(queryData.options[option], queryData.plurals[option]);
@@ -291,6 +300,50 @@ jQuery(function($) {
             }
         }
     }
+    /*
+     * Shows results fetched only from Wikidata
+     * Used for queries with long responses that have to be shown in the body
+     * Disables expansion of the body of the resultElems
+     */
+    function showWdResultsBody (results, queryData, queryInputs) {
+        var resultElem = $("<li></li>");
+        var genericBodyText = queryData.body;
+        var previous;
+        for (var result in results) {
+            var r = results[result];
+            if (r.object.value != previous) {
+                var resultHeader = $("<div></div>").addClass("collapsible-header result-item-header");
+                var resultBody = $("<div></div>").addClass("collapsible-body");
+                var bodyText = genericBodyText;
+
+                for (var replacement in queryData.replacements) {
+                    var replacementName = queryData.replacements[replacement];
+                    var replacementType = queryData.replacementTypes[replacement];
+                    var val = r[replacementName].value;
+                    switch (replacementType) {
+                        case "date":
+                            var date = new Date(val);
+                            val = date.toLocaleDateString();
+                            break;
+                    }
+                    bodyText = bodyText.replace("$" + replacementName, val);
+                }
+                if (r.objectDescription != null) {
+                    var headerText = r.objectLabel.value + " (" + r.objectDescription.value + ")";
+                } else {
+                    var headerText = r.objectLabel.value;
+                }
+                resultHeader.html(headerText);
+                resultBody.html(bodyText);
+                resultElem.append(resultHeader);
+                resultElem.append(resultBody);
+                $("#resultArea").append(resultElem);
+                resultElem = $("<li></li>");
+                previous = r.object.value;
+            }
+        }
+    }
+
 
     /*
      * Shows results fetched from Wikidata and Wikipedia

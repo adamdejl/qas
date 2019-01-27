@@ -4,7 +4,7 @@ var data = {
     0: {
         type: "wOfWhat",
         patterns: {
-            0: /(?:what|who)\s+is\s+(?:the)?\s*(.+)\s+of\s*(?:the)?\s+(.+?)\??$/i,
+            0: /(?:what|who|when)\s+(?:are|is|was)\s+(?:the)?\s*(.+?)\s+of\s*(?:the)?\s+(.+?)\??$/i,
             1: /(.+?)\s+of\s*(?:the)?\s+(.+?)\??$/i,
         },
         inputs: {
@@ -188,6 +188,47 @@ var data = {
             ORDER BY DESC(?count)`
     },
     5: {
+        type: "genericWdBody",
+        patterns: {
+            0: /play\s+(.+?)$/i,
+            1: /please\s+play\s+(.+?)$/i
+        },
+        inputs: {
+            0: "$searchedObject"
+        },
+        replacements: {
+            0: "youtubeId"
+        },
+        replacementTypes: {
+            0: "string"
+        },
+        body: `<iframe width="656" height="369" src="https://www.youtube.com/embed/$youtubeId"
+              frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope;
+              picture-in-picture" allowfullscreen></iframe>`,
+        query: `
+            SELECT ?object ?objectLabel ?objectDescription ?youtubeId (COUNT(DISTINCT ?sitelink) AS ?count) WHERE {
+              ?object rdfs:label|skos:altLabel "$searchedObject"@en .
+              ?object wdt:P1651 ?youtubeId .
+              OPTIONAL {
+                ?article schema:isPartOf <https://en.wikipedia.org/>;
+                  schema:about ?object.
+              }
+              OPTIONAL {
+                ?sitelink schema:about ?object .
+              }
+              OPTIONAL {
+                ?object wdt:P18 ?picture .
+              }
+              SERVICE wikibase:label {
+                bd:serviceParam wikibase:language "en" .
+              }
+              FILTER NOT EXISTS{?object wdt:P31 wd:Q4167410}
+              FILTER NOT EXISTS{?object wdt:P31/wdt:P279* wd:Q18616576}
+            }
+            GROUP BY ?object ?objectLabel ?objectDescription ?youtubeId
+            ORDER BY DESC(?count)`
+    },
+    6: {
         type: "news",
         patterns: {
           0: /tell (?:me the|me) (.+?) (?:from|of) (.+?)\.?$/i,
