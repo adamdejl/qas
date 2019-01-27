@@ -313,7 +313,7 @@ var data = {
         replacementTypes: {
             0: "string"
         },
-        body: `<div style="text-align: center"><img src=$picture width="100%" alt="Picture of searched object"></div>`,
+        body: `<div style="text-align: center"><img src=$picture width="70%" alt="Picture of searched object"></div>`,
         query: `
             SELECT ?object ?objectLabel ?objectDescription ?picture (COUNT(DISTINCT ?sitelink) AS ?count) WHERE {
               ?object rdfs:label|skos:altLabel "$searchedObject"@en .
