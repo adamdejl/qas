@@ -1,5 +1,29 @@
 "use strict"
 
+var aliases = {
+    0: {
+        pattern: /who\s+directed\s+(.+?)\??$/i,
+        inputs: {
+            0: "$1"
+        },
+        query: "who is the director of $1"
+    },
+    1: {
+        pattern: /who\s+owns\s+(.+?)\??$/i,
+        inputs: {
+            0: "$1"
+        },
+        query: "who is the owner of $1"
+    },
+    2: {
+        pattern: /how\s+many\s+people\s+live\s+in\s+(.+?)\??$/i,
+        inputs: {
+            0: "$1"
+        },
+        query: "what is the population of $1"
+    }
+}
+
 var data = {
     0: {
         type: "wOfWhat",
@@ -24,11 +48,13 @@ var data = {
         },
         replaceValues: {
             0: "owned by",
-            1: "childs"
+            1: "founded by",
+            2: "childs"
         },
         replaceBy: {
             0: "owner",
-            1: "children"
+            1: "founder",
+            2: "children"
         },
         query: `
             SELECT ?object ?objectLabel ?objectDescription ?result ?resultLabel (COUNT(DISTINCT ?sitelink) AS ?count) WHERE {

@@ -50,15 +50,31 @@ jQuery(function($) {
         hideResults();
         showLoadingSpinner();
 
+        var reExp;
         var queryData;
         var queryInputs = [];
         var matched = false;
+        /* Replace aliases */
+        for (var alias in aliases) {
+            reExp = aliases[alias].pattern;
+            if (reExp.test(query)) {
+                var newQuery = aliases[alias].query;
+                queryInputs = reExp.exec(query).slice(1);
+                for (var input in aliases[alias].inputs) {
+                    newQuery = newQuery.replace(aliases[alias].inputs[input], queryInputs[input]);
+                }
+                query = newQuery
+                break;
+            }
+        }
+
+        /* Perform matching */
         for (var i in data) {
             if (matched) {
                 break;
             }
             for (var j in data[i].patterns) {
-                var reExp = data[i].patterns[j];
+                reExp = data[i].patterns[j];
                 if (reExp.test(query)) {
                     queryData = data[i];
                     queryInputs = reExp.exec(query).slice(1);
