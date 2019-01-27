@@ -18,6 +18,10 @@ jQuery(function($) {
         $("#resultArea").show();
     }
 
+    function expandItem(item) {
+        $("#resultArea.collapsible").collapsible("open", item);
+    }
+
     function hideResults() {
         $("#resultArea").hide();
     }
@@ -361,6 +365,8 @@ jQuery(function($) {
                 previous = r.object.value;
             }
         }
+
+        expandItem(0);
     }
 
 
@@ -433,6 +439,8 @@ jQuery(function($) {
                 resultElem = $("<li></li>");
             }
         }
+
+        expandItem(0);
     }
 
     function showApiConnectionError() {
@@ -673,5 +681,7 @@ jQuery(function($) {
             resultElem.append(resultBody);
             $("#resultArea").append(resultElem);
         }
+
+        expandItem(0);
     }
 });
