@@ -21,6 +21,8 @@
 .result-item-header {
     font-weight: bold;
     padding: 1rem;
+    background-color: #fff;
+    border-bottom: 1px solid #ddd;
 }
 
 .collapsible-body {

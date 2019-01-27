@@ -194,8 +194,7 @@ jQuery(function($) {
                 resultsArr.push(results[result][queryData.replacement].value);
                 result++;
             }
-            var resultHeader = $("<div></div>").addClass("collapsible-header result-item-header");
-            var resultBody = $("<div></div>").addClass("collapsible-body");
+            var resultHeader = $("<div></div>").addClass("result-item-header");
             var headerText = genericHeaderText;
             if (resultsArr.length > 1) {
                 var val = resultsArr.slice(0, -1).join(", ");
@@ -221,7 +220,6 @@ jQuery(function($) {
             headerText = headerText.charAt(0).toUpperCase() + headerText.slice(1);
             resultHeader.text(headerText);
             resultElem.append(resultHeader);
-            resultElem.append(resultBody);
             $("#resultArea").append(resultElem);
             resultElem = $("<li></li>");
         }
