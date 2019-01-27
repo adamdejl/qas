@@ -10,6 +10,12 @@ Example of things you can ask QAS:
 - Who is the director of Avatar?
 - Who is the author of the martian
 - What was Concorde
+- What is the currency of Thailand
+- What is the capital of South Africa
+- Who are the children of Albert Einstein?
+- Who is CEO of Apple?
 - What are the headlines of BBC?
 - Show me the latest news from Independent.
 - Tell me news from Wired
+- Play Despacito
+- Play Firestone
